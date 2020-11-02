@@ -11,7 +11,7 @@ int main()
     ds input_data;
     ds filter;
     
-    InitParamter(&input_data, 1,3,6,6, false);
+    InitParamter(&input_data, 1,3,10,10, false);
     InitParamter(&filter, 5,3,3,3, false);
 
     layer config;
@@ -19,7 +19,6 @@ int main()
     int str=1;
     int dil=1;
     layerInit(&config,pad,str,dil);
-
 
     Convolution(&input_data, &filter, &output_data, &config, 0);
 

@@ -2,10 +2,7 @@
 #include <iostream>
 
 typedef  float D_type;
-// input batch
-// input # of channel
-// filter # of filter 
-// filter # of kernel
+
 
 typedef struct weight_data_struct
 {
@@ -172,7 +169,6 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
             }
         }
     }
-
     return;
 }
 
@@ -282,7 +278,6 @@ void Convolution(const ds* input, const ds* filter, ds* output, const layer* con
         // Do DepthWiseConvolution
         DataReset(&pad_temp);
     }
-
     return;
 }
 
