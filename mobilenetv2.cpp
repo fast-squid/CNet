@@ -10,14 +10,13 @@ int main()
     ds input_data;
     ds filter;
     
-    InitParameter(&input_data, 1,3,224,224);
-    InitParameter(&filter, 64,3,3,3);
+    InitParameter(&input_data, 1,1,3,3);
+    InitParameter(&filter, 1,1,3,3);
     lc feature;
-    feature.padding=2;
-    feature.strides=3;
+    feature.padding=1;
+    feature.strides=1;
 
     Convolution(&input_data, &filter, &output_data, &feature);
-
 
 
     D_type test_val;
