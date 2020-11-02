@@ -5,24 +5,28 @@ import tvm
 from tvm.contrib import graph_runtime
 
 def Init(data, shape, mod=False):
-    datum=int(0)
+    datum=int(1)
     for OC in range(0,shape[0]):
         for IC in range(0,shape[1]):
             for H in range(0,shape[2]):
                 for W in range(0,shape[3]):
                     data[OC][IC][H][W] = float(datum)
-                    datum = datum % int(1024)
+                    datum = datum % int(24)
                     datum += 1
 
     return
-strides = (1,1)
+
+P=2
+S=3
+
+strides = (S,S)
 #####################
-padding = (1,1,1,1)
+padding = (P,P,P,P)
 #####################
 dilation = (1,1)
 
-data_shape = (1,3,10,10)
-w_shape = (5,3,3,3)
+data_shape = (1,3,224,224)
+w_shape = (64,3,3,3)
 
 
 guess = data_shape[3]*padding[0] + padding[0]

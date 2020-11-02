@@ -46,7 +46,7 @@ void InitParameter(ds* data, int out_channel ,int in_channel, int height, int wi
                 {
                     int data_index= oc*in_channel*height*width + ic*height*width + h*width + w;
                     data->data[data_index] = (D_type)temp;
-                    temp = temp % 1024;
+                    temp = temp % 24;
                     temp ++;
                 }
             }
@@ -111,9 +111,14 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
     output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );
     output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
 
+    std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
+
     ds pad_input;
     PaddingInputImage(input, layer->padding, &pad_input);
 
+
+    // ic,kh,kw ---> reduction index
+    // output_d += Pad_input[ic][oh+kh][ow+hw]*Filter[ic][kh][kw]
     for(int oc=0; oc< output->in_channel; oc++ )
     {
         for(int oh=0; oh<output->height; oh++)
@@ -132,9 +137,9 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
                     {
                         for( int kw=0; kw<filter->width; kw++)
                         {
-                            int pad_index = ic*input->height*input->width
-                                            + oh*input->height + kh*input->height
-                                            + ow +layer->strides-1 + kw + layer->strides-1;
+                            int pad_index = ic*pad_input.height*pad_input.width
+                                            + oh*(layer->strides)*pad_input.width + kh*pad_input.width
+                                            + ow*(layer->strides) + kw;
 
                             int kernel_index = oc*filter->in_channel*filter->height*filter->width
                                                 + ic*filter->height*filter->width
@@ -148,6 +153,7 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
             }
         }
     }
+    free( pad_input.data );
     return;
 }
 

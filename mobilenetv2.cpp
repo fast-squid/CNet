@@ -10,13 +10,41 @@ int main()
     ds input_data;
     ds filter;
     
-    InitParameter(&input_data, 1,3,10,10);
-    InitParameter(&filter, 5,3,3,3);
-
+    InitParameter(&input_data, 1,3,224,224);
+    InitParameter(&filter, 64,3,3,3);
     lc feature;
-    feature.padding=1;
-    feature.strides=1;
+    feature.padding=2;
+    feature.strides=3;
+
+    Convolution(&input_data, &filter, &output_data, &feature);
+
+
+
+    D_type test_val;
+    int tag=0;
+    std::ifstream testing("valid.bin", std::ios::binary);
+    while( testing.read(reinterpret_cast<char*>(&test_val), sizeof(D_type)))
+    {   
+        if( std::abs( test_val- output_data.data[tag] ) > 0.0000001)
+        {
+            std::cout.precision(10);
+
+            std::cout<<"ERROR"<<std::endl;
+            std::cout<<"TAG : "<<tag<<std::endl;
+            std::cout<<test_val<<std::endl;
+            std::cout<< output_data.data[tag] <<std::endl;
+
+            std::cout<< test_val- output_data.data[tag] <<std::endl;
+            exit(-1);
+        }
+        else
+        {
+        }
+        tag++;
+    }   
+    std::cout<<"Validation Sucess"<<std::endl;
     return 0;
+
 }
 
 
