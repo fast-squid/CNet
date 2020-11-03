@@ -89,7 +89,6 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
     '''
     
     '''
-
     var = np.sqrt(moving_var + eps)
     output_data = np.ones(input_data.shape,np.float32)
     factorA = gamma/var
