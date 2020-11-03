@@ -4,6 +4,7 @@ import torchvision.models as models
 import pickle
 import numpy as np
 from tvm.contrib.download import download_testdata
+import math
 
 root = "/home/alpha930/Desktop/CNetProject/Param/"
 
@@ -76,57 +77,52 @@ def SimpleRunning():
     output = model(i)
     print(output)
 
+def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
+    '''
+    var = np.sqrt(moving_var + eps)
+    factorA = gamma/var
+    factorB = beta - factorA*moving_mean
+    ## channel wise mult need.
+    output = factorA*input_data + factorB
+    '''
+
+    ''' do LJM '''
+    '''
+    
+    '''
+    return output
+
 def TESTlayer():
     input_data = np.random.uniform(-1,1,size=(1,3,224,224)).astype('float32')
     test_input_data = torch.tensor(input_data)
-    
     params, base = CutLayer(0,1,True)
-    for tag in params:
-        tag['data'].astype("float32").tofile(root+str(tag['name'])+".bin")
-
-    base.eval()
 
     with torch.no_grad():
         valid_data = base[0][0](test_input_data)
+        test_input = Numpyize(valid_data)
         valid_data = base[0][1](valid_data)
+
+    valid_data = Numpyize(valid_data)
+
+    BN = base[0][1]
+    mean = Numpyize(BN.running_mean)
+    var = Numpyize(BN.running_var)
+    gamma = params[1]['data']
+    beta = params[2]['data']
+
+    output_test = customBN(test_input, mean,var,gamma,beta,1e-05)
+
+    if CMP(output_test,valid_data):
+        print("CLEAR")
+
+    else:
+        print("NOT")
 
     return
 
-def BaseLine():
-    # Download an example image from the pytorch website
-    import torch
-    model = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
-    model.eval()
-
-    print(model)
-    import urllib
-    url, filename = ("https://github.com/pytorch/hub/raw/master/images/dog.jpg", "dog.jpg")
-    try: urllib.URLopener().retrieve(url, filename)
-    except: urllib.request.urlretrieve(url, filename)
-    # sample execution (requires torchvision)
-    from PIL import Image
-    from torchvision import transforms
-    input_image = Image.open(filename)
-    preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-    input_tensor = preprocess(input_image)
-    input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
-
-    # move the input and model to GPU for speed if available
-    if torch.cuda.is_available():
-        input_batch = input_batch.to('cuda')
-        model.to('cuda')
-
-    with torch.no_grad():
-        output = model(input_batch)
-
-    print("TEST")
 
 
+    
 def BASELINE():
 
 
@@ -196,9 +192,9 @@ def BASELINE():
 
     return
 
-GetParam()
 
-#TESTlayer()
+#GetParam()
+TESTlayer()
 #BASELINE()
 
 
