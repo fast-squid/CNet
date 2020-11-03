@@ -3,7 +3,6 @@ import torch.nn as nn
 import torchvision.models as models
 import pickle
 import numpy as np
-from tvm.contrib.download import download_testdata
 import math
 
 root = "/home/alpha930/Desktop/CNetProject/Param/"
@@ -76,7 +75,7 @@ def SimpleRunning():
 
     output = model(i)
     print(output)
-
+idx = 0
 def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
     '''
     var = np.sqrt(moving_var + eps)
@@ -90,7 +89,19 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
     '''
     
     '''
-    return output
+    var = np.sqrt(moving_var + eps)
+    output_data = np.ones(input_data.shape,np.float32)
+    factorA = gamma/var
+    factorB = beta - factorA*moving_mean
+
+    global idx
+    for i in input_data:
+        for j in i:
+            output_data[0][idx] = factorA[idx]*j + factorB[idx]
+            idx = idx + 1
+			
+    
+    return output_data
 
 def TESTlayer():
     input_data = np.random.uniform(-1,1,size=(1,3,224,224)).astype('float32')
