@@ -10,7 +10,7 @@
 // channel wise -> mean and var of batch*height*width
 
 
-void BatchNorm(ds* X, ds* gamma, ds* beta, ds eps, ds* moving_mean, ds* moving_var, ds* output_data)
+void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_mean, D_type* moving_var, ds* Y)
 {
 	Y->out_channel = X->out_channel;
 	Y->in_channel = X->in_channel;
