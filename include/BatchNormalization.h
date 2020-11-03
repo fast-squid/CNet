@@ -9,7 +9,8 @@
 // y = (gamma/( root( Var[x] + eps) ))*x + beta - gamma*E[x]/ ( root( Var[x] + eps ) ) 
 // channel wise -> mean and var of batch*height*width
 
-void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_mean, D_type* moving_var, ds* Y)
+
+void BatchNorm(ds* X, ds* gamma, ds* beta, ds eps, ds* moving_mean, ds* moving_var, ds* output_data)
 {
 	Y->out_channel = X->out_channel;
 	Y->in_channel = X->in_channel;
@@ -24,6 +25,7 @@ void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_me
 	{
 		factorA[i] = gamma[i]/sqrt(moving_var[i] + eps);
 	}
+
 
 	for(int oc = 0; oc<X->out_channel; oc++)
     {
@@ -45,3 +47,4 @@ void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_me
         }
     }
 }
+

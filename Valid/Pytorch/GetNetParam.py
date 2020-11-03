@@ -204,8 +204,8 @@ def BASELINE():
     return
 
 
-#GetParam()
-TESTlayer()
+GetParam()
+#TESTlayer()
 #BASELINE()
 
 
