@@ -1,3 +1,4 @@
+#pragma once
 typedef  float D_type;
 
 typedef struct weight_data_struct
