@@ -1,3 +1,4 @@
+#pragma once
 #include <cmath>
 #include <iostream>
 #include "DataStruct.h"
@@ -38,7 +39,7 @@ void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_me
 						+ w;
 					int c_index = oc*X->in_channel
 						+ic;
-                    Y->data[index] = factorA[c_index]*(X->data[index] - moving_mean[c_index]) + beta[c_index];
+                    Y->data[data_index] = factorA[c_index]*(X->data[data_index] - moving_mean[c_index]) + beta[c_index];
                 }
             }
         }

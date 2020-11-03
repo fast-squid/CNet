@@ -2,6 +2,7 @@
 #include <fstream>
 #include <math.h>
 #include "include/Convolution.h"
+#include "BatchNormalization.h"
 
 int main()
 {
