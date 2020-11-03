@@ -2,36 +2,64 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import pickle
+import numpy as np
+from tvm.contrib.download import download_testdata
+
+root = "/home/alpha930/Desktop/CNetProject/Param/"
+
+def CMP(t1,t2,bound=0.00001):
+    if np.all( np.abs(t1-t2)< bound ):
+        return True
+    else:
+        return False
+
+def Tensorize(data):
+    tensor = torch.tensor(data)
+    return tensor
+
+def Numpyize(data):
+    nump = data.data.numpy()
+    return nump
 
 
-def GetParam():
+def GetParam(get_out=False):
     mv2 = models.mobilenet_v2(pretrained=True)
-    mv2.parameters()
+    mv2 = mv2.eval()
+    #v2.parameters()
 
     data = []
     for name, param in mv2.named_parameters():
         data.append({"name":name, 'data':param.data.numpy()})
+        param.data.numpy().astype("float32").tofile(root+str(name)+".bin")
+    
+    if get_out:
+        with open("./mobilenet_v2.pkl", 'wb') as f:
+            pickle.dump(data,f)
+        with open("./mobilenet_v2.pkl","rb") as f:
+            load_data = pickle.load(f)
+    
+    return data
 
-    with open("./mobilenet_v2.pkl", 'wb') as f:
-        pickle.dump(data,f)
-    with open("./mobilenet_v2.pkl","rb") as f:
-        load_data = pickle.load(f)
 
-def CutLayer():
+
+def CutLayer(start_p, end_p, debug=False):
     #### Cut Layer
-    mv2_cut = models.mobilenet_v2(pretrained=True).features[:1]
-    print(mv2_cut)
+    data = []
+    mv2_cut = models.mobilenet_v2(pretrained=True).features[start_p:end_p]
+    mv2_cut = mv2_cut.eval()
+
+    if debug:
+        print(mv2_cut)
     for name, param in mv2_cut.named_parameters():
-        print(name)
+        if debug:
+            print(name)
+        data.append({'name':name, 'data':param.data.numpy()})
+    
+    return data, mv2_cut
 
 def SimpleRunning():
 
     #### TEST
-    mv2_cut.eval()
-    data = torch.randn(1,3,224,224)
-    output = mv2_cut(data)
-    print(output.shape)
-
     ############################ CUSTOM #################################
     arr=[1,2,3,4,5,6,7,8,9]
 
@@ -42,19 +70,136 @@ def SimpleRunning():
 
     conv = torch.nn.Conv2d(in_channels=1,out_channels=3,kernel_size=(3,3), stride=(1,1), padding=(1,1), bias=False)
     conv.weight.data = w
-    model = conv.eval()
+
+    model = conv.eval()## do Inference Mode
 
     output = model(i)
     print(output)
 
 def TESTlayer():
+    input_data = np.random.uniform(-1,1,size=(1,3,224,224)).astype('float32')
+    test_input_data = torch.tensor(input_data)
+    
+    params, base = CutLayer(0,1,True)
+    for tag in params:
+        tag['data'].astype("float32").tofile(root+str(tag['name'])+".bin")
 
-    CutLayer()
-    model = nn.Sequential(
+    base.eval()
 
-    )
-    )
+    with torch.no_grad():
+        valid_data = base[0][0](test_input_data)
+        valid_data = base[0][1](valid_data)
+
     return
 
+def BaseLine():
+    # Download an example image from the pytorch website
+    import torch
+    model = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
+    model.eval()
 
-TESTlayer()
+    print(model)
+    import urllib
+    url, filename = ("https://github.com/pytorch/hub/raw/master/images/dog.jpg", "dog.jpg")
+    try: urllib.URLopener().retrieve(url, filename)
+    except: urllib.request.urlretrieve(url, filename)
+    # sample execution (requires torchvision)
+    from PIL import Image
+    from torchvision import transforms
+    input_image = Image.open(filename)
+    preprocess = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    input_tensor = preprocess(input_image)
+    input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
+
+    # move the input and model to GPU for speed if available
+    if torch.cuda.is_available():
+        input_batch = input_batch.to('cuda')
+        model.to('cuda')
+
+    with torch.no_grad():
+        output = model(input_batch)
+
+    print("TEST")
+
+
+def BASELINE():
+
+
+    import torch
+    model = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
+    model.eval()
+
+    from PIL import Image
+    img_url = "https://github.com/dmlc/mxnet.js/blob/main/data/cat.png?raw=true"
+    img_path = download_testdata(img_url, "cat.png", module="data")
+    img = Image.open(img_path).resize((224, 224))
+
+    # Preprocess the image and convert to tensor
+    from torchvision import transforms
+
+    my_preprocess = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+    img = my_preprocess(img)
+    img = np.expand_dims(img, 0)
+
+    synset_url = "".join(
+        [
+            "https://raw.githubusercontent.com/Cadene/",
+            "pretrained-models.pytorch/master/data/",
+            "imagenet_synsets.txt",
+        ]
+    )
+    synset_name = "imagenet_synsets.txt"
+    synset_path = download_testdata(synset_url, synset_name, module="data")
+    with open(synset_path) as f:
+        synsets = f.readlines()
+
+    synsets = [x.strip() for x in synsets]
+    splits = [line.split(" ") for line in synsets]
+    key_to_classname = {spl[0]: " ".join(spl[1:]) for spl in splits}
+
+    class_url = "".join(
+        [
+            "https://raw.githubusercontent.com/Cadene/",
+            "pretrained-models.pytorch/master/data/",
+            "imagenet_classes.txt",
+        ]
+    )
+    class_name = "imagenet_classes.txt"
+    class_path = download_testdata(class_url, class_name, module="data")
+    with open(class_path) as f:
+        class_id_to_key = f.readlines()
+
+    class_id_to_key = [x.strip() for x in class_id_to_key]
+
+    # Convert input to PyTorch variable and get PyTorch result for comparison
+    with torch.no_grad():
+        torch_img = torch.from_numpy(img)
+        output = model(torch_img)
+
+        # Get top-1 result for PyTorch
+        top1_torch = np.argmax(output.numpy())
+        torch_class_key = class_id_to_key[top1_torch]
+
+    print("Torch top-1 id: {}, class name: {}".format(top1_torch, key_to_classname[torch_class_key]))
+
+    return
+
+GetParam()
+
+#TESTlayer()
+#BASELINE()
+
+
+
