@@ -5,7 +5,8 @@ import pickle
 import numpy as np
 import math
 
-root = "/home/alpha930/Desktop/CNetProject/Param/"
+alpha_root = "/home/alpha930/Desktop/CNetProject/Param/"
+squid_root = "/home/dlwjdaud/mobisprj/Valid/Pytorch/validation_data/"
 
 def CMP(t1,t2,bound=0.00001):
     if np.all( np.abs(t1-t2)< bound ):
@@ -30,7 +31,7 @@ def GetParam(get_out=False):
     data = []
     for name, param in mv2.named_parameters():
         data.append({"name":name, 'data':param.data.numpy()})
-        param.data.numpy().astype("float32").tofile(root+str(name)+".bin")
+        param.data.numpy().astype("float32").tofile(squid_root+str(name)+".bin")
     
     if get_out:
         with open("./mobilenet_v2.pkl", 'wb') as f:
@@ -99,8 +100,18 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
         for j in i:
             output_data[0][idx] = factorA[idx]*j + factorB[idx]
             idx = idx + 1
-			
-    
+    '''
+	print datas JUST FOR TEST!
+    '''	
+    input_data.astype("float32").tofile(squid_root+"input_data.bin")
+    moving_mean.astype("float32").tofile(squid_root+"moving_mean.bin")
+    moving_var.astype("float32").tofile(squid_root+"moving_var.bin")
+    gamma.astype("float32").tofile(squid_root+"gamma.bin")
+    beta.astype("float32").tofile(squid_root+"beta.bin")
+    output_data.astype("float32").tofile(squid_root+"output_data.bin")
+    factorA.astype("float32").tofile(squid_root+"factorA.bin") 
+    var.astype("float32").tofile(squid_root+"var.bin")
+    print(eps)
     return output_data
 
 def TESTlayer():
@@ -204,8 +215,8 @@ def BASELINE():
     return
 
 
-GetParam()
-#TESTlayer()
+#GetParam()
+TESTlayer()
 #BASELINE()
 
 

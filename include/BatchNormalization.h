@@ -16,14 +16,15 @@ void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_me
 	Y->in_channel = X->in_channel;
 	Y->height = X->height;
 	Y->width = X->width;
-	Y->data = (D_type*)malloc(sizeof(X->data));
-
+	Y->data = (D_type*)malloc(sizeof(D_type)*Y->out_channel*Y->in_channel*Y->height*Y->width);
 	int size = X->out_channel*X->in_channel;
 	D_type* factorA = (D_type*)malloc(sizeof(D_type)*size);
+	D_type* var = (D_type*)malloc(sizeof(D_type)*size);	
 	
 	for(int i = 0; i < size; i++)
 	{
-		factorA[i] = gamma[i]/sqrt(moving_var[i] + eps);
+		var[i] = sqrt(moving_var[i] + eps);
+		factorA[i] = gamma[i]/var[i];
 	}
 
 	for(int oc = 0; oc<X->out_channel; oc++)

@@ -4,9 +4,63 @@
 #include "include/Convolution.h"
 #include "BatchNormalization.h"
 
+#define EPSILON 0.000001
+
+void ReadBinFile(char* path, D_type* data)
+{
+	int idx = 0;
+	float temp;
+	std::cout<< path<<std::endl;
+	std::ifstream ifs(path, std::ios::binary);
+    while( ifs.read(reinterpret_cast<char*>(&temp), sizeof(D_type)))
+	{
+		data[idx++] = temp;
+	}
+}
+
+void BatchNormalizationTest()
+{
+	ds input;
+	ds v_output;
+	ds my_output;
+
+	InitParameter(&input, 1, 32, 112, 112);
+	InitParameter(&v_output, 1, 32, 112, 112);
+
+	D_type gamma[32];
+	D_type beta[32];
+	D_type moving_mean[32];
+	D_type moving_var[32];
+	D_type eps = EPSILON;
+
+	ReadBinFile("./validation_data/input_data.bin",input.data);
+	ReadBinFile("./validation_data/output_data.bin",v_output.data);
+	ReadBinFile("./validation_data/moving_mean.bin",moving_mean);
+	ReadBinFile("./validation_data/moving_var.bin",moving_var);
+	ReadBinFile("./validation_data/beta.bin",beta);
+	ReadBinFile("./validation_data/gamma.bin",gamma);
+	
+	BatchNorm(&input, gamma, beta, eps, moving_mean, moving_var, &my_output);
+	// validation test
+
+	for(int i = 0; i< 1*32*112*112 ; i++)
+    {   
+        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.000001)
+        {
+            std::cout.precision(10);
+
+            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
+            std::cout<<"IDX : "<<i<<std::endl;
+        }
+    }
+	std::cout<<"final Validation Sucess"<<std::endl;
+    
+}
+
 int main()
 {
-
+	BatchNormalizationTest();
+	return 0;
     ds output_data;
     ds input_data;
     ds filter;
@@ -22,6 +76,11 @@ int main()
 
     D_type test_val;
     int tag=0;
+	// gamma.bin (32)
+	// beta.bin
+	// moving.bin
+
+	
     std::ifstream testing("valid.bin", std::ios::binary);
     while( testing.read(reinterpret_cast<char*>(&test_val), sizeof(D_type)))
     {   

@@ -219,10 +219,13 @@ def mobilenet_v2(pretrained: bool = False, progress: bool = True, **kwargs: Any)
             from torch.utils.model_zoo import load_url as load_state_dict_from_url
         state_dict = load_state_dict_from_url(
             'https://download.pytorch.org/models/mobilenet_v2-b0353104.pth', progress=True)
+        for key, value in state_dict.items():
+            print(key, value.shape)
         model.load_state_dict(state_dict)
     return model
 
 if __name__ == '__main__':
     net = mobilenet_v2(True)
+    print(net)
 
 
