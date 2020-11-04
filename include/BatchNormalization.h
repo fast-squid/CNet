@@ -26,7 +26,6 @@ void BatchNorm(ds* X, D_type* gamma, D_type* beta, D_type eps, D_type* moving_me
 		factorA[i] = gamma[i]/sqrt(moving_var[i] + eps);
 	}
 
-
 	for(int oc = 0; oc<X->out_channel; oc++)
     {
         for(int ic=0; ic<X->in_channel; ic++)
