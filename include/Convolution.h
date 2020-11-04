@@ -89,6 +89,7 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
 
 void Convolution(ds* input, ds* filter, ds* output, lc* layer )
 {
+	
     output->out_channel = 1;
     output->in_channel = filter->out_channel;
     output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
@@ -140,4 +141,40 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
     free( pad_input.data );
     return;
 }
+
+void GroupConvolution(ds* input, ds* filter, ds* output, lc* layer, int groups)
+{
+	D_type* in_base_ptr;
+	D_type* out_base_ptr;
+	
+	output->out_channel = 1;
+    output->in_channel = filter->out_channel;
+    output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
+    output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );
+    output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
+	
+	in_base_ptr = input->data;
+	out_base_ptr = output->data;
+	int in_group_offset = (input->in_channel/groups)*input->height*input->width;
+	int out_group_offset = (output->in_channel/groups)*output->height*output->width;
+	
+	int org_filter_oc = output->out_channel;
+	int org_filter_ic = output->in_channel;
+
+	filter->in_channel/=groups;
+	filter->out_channel/=groups;
+	int filter_group_offset = filter->in_channel*filter->out_channel*filter->height*filter->width;
+	for(int g = 0; g<groups; g++)
+	{
+		input->data = &input->data[g*in_group_offset];
+		output->data = &output->data[g*out_group_offset];
+		filter->data = &filter->data[g*filter_group_offset];
+		Convolution(input, filter, output, layer);
+	}
+	input->data = in_base_ptr;
+	output->data = out_base_ptr;
+	filter->in_channel = org_filter_ic;
+	filter->out_channel = org_filter_oc;
+}
+
 
