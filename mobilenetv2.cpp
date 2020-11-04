@@ -64,10 +64,10 @@ void GroupConvolutionTest()
 	ds my_output;
 	ds filter;
 	lc layer;
-	layerInit(&layer, 1, 1, 2);
+	layerInit(&layer, 1, 1, 4);
  
 	InitParameter(&input, 1, 32, 112, 112);
-	InitParameter(&filter, 32, 16, 3, 3);
+	InitParameter(&filter, 32, 8, 3, 3);
 	InitParameter(&v_output, 1, 32, 112, 112);
 	
 	ReadBinFile("./validation_data/a.bin",input.data);

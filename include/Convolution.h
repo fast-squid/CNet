@@ -188,13 +188,8 @@ void GroupConvolution(ds* input, ds* filter, ds* output, lc* layer)
 		*sliced_filter.height
 		*sliced_filter.width;
 
-	for(int g = 0; g<2; g++)
+	for(int g = 0; g<groups; g++)
 	{
-		std::cout<< "group : " << g << std::endl;
-		std::cout<< "input : " << g*in_offset << std::endl;
-		std::cout<< "output : " << g*out_offset << std::endl;
-		std::cout<< "filter : " << g*filter_offset << std::endl;
-
 		sliced_input.data = &input->data[g*in_offset];
 		sliced_output.data = &output->data[g*out_offset];
 		sliced_filter.data = &filter->data[g*filter_offset];
