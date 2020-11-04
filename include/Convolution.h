@@ -3,7 +3,7 @@
 #include <iostream>
 #include "DataStruct.h"
 
-void layerInit(lc* layer, int pad, int stride, int groups=1)
+void layerInit(lc* layer, int pad, int stride, int groups)
 {
     layer->padding=pad;
     layer->strides=stride;
@@ -89,13 +89,14 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
 
 void Convolution(ds* input, ds* filter, ds* output, lc* layer )
 {
-	
-    output->out_channel = 1;
-    output->in_channel = filter->out_channel;
-    output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
-    output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );
-    output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
-
+	if(layer->groups == 1)
+	{
+		output->out_channel = 1;
+		output->in_channel = filter->out_channel;
+		output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
+		output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );	
+		output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
+	}
     std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
 
     ds pad_input;
@@ -139,42 +140,66 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
         }
     }
     free( pad_input.data );
+	std::cout<<"Conv done"<<std::endl;
     return;
 }
 
-void GroupConvolution(ds* input, ds* filter, ds* output, lc* layer, int groups)
+void SetOutputShape(ds* input, ds* filter, ds* output, lc* layer)
 {
-	D_type* in_base_ptr;
-	D_type* out_base_ptr;
-	
 	output->out_channel = 1;
-    output->in_channel = filter->out_channel;
-    output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
-    output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );
-    output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
-	
-	in_base_ptr = input->data;
-	out_base_ptr = output->data;
-	int in_group_offset = (input->in_channel/groups)*input->height*input->width;
-	int out_group_offset = (output->in_channel/groups)*output->height*output->width;
-	
-	int org_filter_oc = output->out_channel;
-	int org_filter_ic = output->in_channel;
+	output->in_channel = filter->out_channel;
+	output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/layer->strides +1);
+	output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/layer->strides +1 );
+	output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width*layer->groups); // multiplied by groups
+}
 
-	filter->in_channel/=groups;
-	filter->out_channel/=groups;
-	int filter_group_offset = filter->in_channel*filter->out_channel*filter->height*filter->width;
-	for(int g = 0; g<groups; g++)
+void GroupConvolution(ds* input, ds* filter, ds* output, lc* layer)
+{
+	int groups = layer->groups;
+	int padding = layer->padding;
+	int strides = layer->strides;
+	// init output
+	SetOutputShape(input, filter, output, layer);
+
+	// splitting by groups
+	ds sliced_input = *input;
+	ds sliced_output = *output;
+	ds sliced_filter = *filter;
+
+	sliced_input.in_channel/=groups;
+	sliced_filter.out_channel/=groups; // # of filters
+	sliced_output.in_channel = sliced_filter.out_channel;
+	
+	printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,
+			sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
+	printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,
+			sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
+	printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output->out_channel, output->in_channel, output->height, output->width,
+			sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
+
+	int in_offset = sliced_input.in_channel
+		*sliced_input.height
+		*sliced_input.width;
+	int out_offset = sliced_output.in_channel
+		*sliced_output.height
+		*sliced_output.width;	
+	int filter_offset = sliced_filter.in_channel
+		*sliced_filter.out_channel
+		*sliced_filter.height
+		*sliced_filter.width;
+
+	for(int g = 0; g<2; g++)
 	{
-		input->data = &input->data[g*in_group_offset];
-		output->data = &output->data[g*out_group_offset];
-		filter->data = &filter->data[g*filter_group_offset];
-		Convolution(input, filter, output, layer);
+		std::cout<< "group : " << g << std::endl;
+		std::cout<< "input : " << g*in_offset << std::endl;
+		std::cout<< "output : " << g*out_offset << std::endl;
+		std::cout<< "filter : " << g*filter_offset << std::endl;
+
+		sliced_input.data = &input->data[g*in_offset];
+		sliced_output.data = &output->data[g*out_offset];
+		sliced_filter.data = &filter->data[g*filter_offset];
+		Convolution(&sliced_input, &sliced_filter, &sliced_output, layer);
 	}
-	input->data = in_base_ptr;
-	output->data = out_base_ptr;
-	filter->in_channel = org_filter_ic;
-	filter->out_channel = org_filter_oc;
 }
 
 

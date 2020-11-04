@@ -3,7 +3,7 @@ typedef  float D_type;
 
 typedef struct weight_data_struct
 {
-    D_type* data;
+    D_type* data=NULL;
     int out_channel = 0; // # of Filter
     int in_channel = 0;  
     int height = 0;

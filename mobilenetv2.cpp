@@ -53,15 +53,51 @@ void BatchNormalizationTest()
             std::cout<<"IDX : "<<i<<std::endl;
         }
     }
-	std::cout<<"final Validation Sucess"<<std::endl;
+	std::cout<<"final Validation Success"<<std::endl;
     
 }
 
+void GroupConvolutionTest()
+{
+	ds input;
+	ds v_output;
+	ds my_output;
+	ds filter;
+	lc layer;
+	layerInit(&layer, 1, 1, 2);
+ 
+	InitParameter(&input, 1, 32, 112, 112);
+	InitParameter(&filter, 32, 16, 3, 3);
+	InitParameter(&v_output, 1, 32, 112, 112);
+	
+	ReadBinFile("./validation_data/a.bin",input.data);
+	ReadBinFile("./validation_data/b.bin",filter.data);
+	ReadBinFile("./validation_data/c.bin",v_output.data);
+
+	GroupConvolution(&input, &filter, &my_output, &layer);
+	// validation test
+
+	for(int i = 0; i< 1*32*112*112 ; i++)
+    {   
+        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.00001)
+        {
+            std::cout.precision(10);
+
+            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
+            std::cout<<"IDX : "<<i<<std::endl;
+        }
+    }
+	std::cout<<"final Validation Success"<<std::endl;
+    
+}
+
+
 int main()
 {
-	BatchNormalizationTest();
-	return 0;
-    ds output_data;
+	//BatchNormalizationTest();
+	GroupConvolutionTest();
+    return 0;
+	ds output_data;
     ds input_data;
     ds filter;
     
