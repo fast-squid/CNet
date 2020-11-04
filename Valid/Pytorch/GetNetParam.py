@@ -109,7 +109,9 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
     gamma.astype("float32").tofile(squid_root+"gamma.bin")
     beta.astype("float32").tofile(squid_root+"beta.bin")
     output_data.astype("float32").tofile(squid_root+"output_data.bin")
-
+    factorA.astype("float32").tofile(squid_root+"factorA.bin") 
+    var.astype("float32").tofile(squid_root+"var.bin")
+    print(eps)
     return output_data
 
 def TESTlayer():
