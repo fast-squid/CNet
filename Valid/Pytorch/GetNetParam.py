@@ -145,10 +145,10 @@ def TESTlayer():
 
 def GroupConvTest():
     input_data = np.random.uniform(-1,1,size=(1,32,112,112)).astype('float32')
-    kernel = np.random.uniform(-1,1,size=(32,8,3,3)).astype('float32')
+    kernel = np.random.uniform(-1,1,size=(32,32,3,3)).astype('float32')
     i = torch.from_numpy(np.array(input_data))
     k = torch.from_numpy(np.array(kernel))
-    conv = torch.nn.Conv2d(in_channels=32,out_channels=16,kernel_size=(3,3), stride=(1,1), padding=(1,1),groups = 4, bias=False)
+    conv = torch.nn.Conv2d(in_channels=32,out_channels=32,kernel_size=(3,3), stride=(1,1), padding=(1,1),groups = 1, bias=False)
     conv.weight.data = k
 
     model = conv.eval()## do Inference Mode
