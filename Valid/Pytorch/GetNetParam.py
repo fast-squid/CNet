@@ -42,7 +42,6 @@ def GetParam(get_out=False):
     return data
 
 
-
 def CutLayer(start_p, end_p, debug=False):
     #### Cut Layer
     data = []
@@ -55,8 +54,10 @@ def CutLayer(start_p, end_p, debug=False):
         if debug:
             print(name)
         data.append({'name':name, 'data':param.data.numpy()})
-    
+
     return data, mv2_cut
+
+CutLayer(0,1)
 
 def SimpleRunning():
 
