@@ -102,7 +102,8 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
             idx = idx + 1
     '''
 	print datas JUST FOR TEST!
-    '''	
+    '''
+    '''
     input_data.astype("float32").tofile(squid_root+"input_data.bin")
     moving_mean.astype("float32").tofile(squid_root+"moving_mean.bin")
     moving_var.astype("float32").tofile(squid_root+"moving_var.bin")
@@ -111,7 +112,7 @@ def customBN(input_data, moving_mean, moving_var, gamma, beta, eps):
     output_data.astype("float32").tofile(squid_root+"output_data.bin")
     factorA.astype("float32").tofile(squid_root+"factorA.bin") 
     var.astype("float32").tofile(squid_root+"var.bin")
-    print(eps)
+    '''
     return output_data
 
 def TESTlayer():
@@ -141,6 +142,23 @@ def TESTlayer():
         print("NOT")
 
     return
+
+def GroupConvTest():
+    input_data = np.random.uniform(-1,1,size=(1,32,112,112)).astype('float32')
+    kernel = np.random.uniform(-1,1,size=(32,8,3,3)).astype('float32')
+    i = torch.from_numpy(np.array(input_data))
+    k = torch.from_numpy(np.array(kernel))
+    conv = torch.nn.Conv2d(in_channels=32,out_channels=16,kernel_size=(3,3), stride=(1,1), padding=(1,1),groups = 4, bias=False)
+    conv.weight.data = k
+
+    model = conv.eval()## do Inference Mode
+   
+    o = model(i)
+    output = Numpyize(o)
+    input_data.astype("float32").tofile(squid_root+"a.bin")
+    kernel.astype("float32").tofile(squid_root+"b.bin")
+    output.astype("float32").tofile(squid_root+"c.bin")
+    print(output.shape)
 
 
 
@@ -216,7 +234,7 @@ def BASELINE():
 
 
 #GetParam()
-TESTlayer()
+GroupConvTest()
 #BASELINE()
 
 
