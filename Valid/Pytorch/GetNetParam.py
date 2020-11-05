@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import math
 
-alpha_root = "/home/alpha930/Desktop/CNetProject/Param/"
+alpha_root = "/home/alpha930/Desktop/CNetProject/CNet/Param/"
 squid_root = "/home/dlwjdaud/mobisprj/Valid/Pytorch/validation_data/"
 
 def CMP(t1,t2,bound=0.00001):
@@ -54,7 +54,7 @@ def CutLayer(start_p, end_p, debug=False):
         if debug:
             print(name)
         data.append({'name':name, 'data':param.data.numpy()})
-
+        param.data.numpy().astype('float32').tofile( alpha_root + str(name)+".bin")
     return data, mv2_cut
 
 CutLayer(0,1)
