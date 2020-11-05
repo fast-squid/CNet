@@ -10,10 +10,19 @@ typedef struct weight_data_struct
     int width = 0;
 } ds;
 
-typedef struct layer_config
+typedef struct conv_param_
 {
     int padding=1;
     int strides=1;
     int groups=1;
-} lc;
+} conv_param;
 
+inline int GetTotalSize(ds* mat)
+{
+	return mat->out_channel * mat->in_channel * mat->height * mat->width; 
+}
+
+inline int GetMatSize(ds* mat)
+{
+	return mat->height * mat->width; 
+}

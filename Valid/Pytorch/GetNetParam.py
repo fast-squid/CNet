@@ -192,7 +192,7 @@ def GroupTEST(G):
     print(output)
     print("EMD")
 
-GroupTEST(G = 2)
+#GroupTEST(G = 2)
 
 
 
@@ -272,5 +272,4 @@ def BASELINE():
 
 
 
-groupConv()
-Conv( group = 2)
+#Conv( group = 2)

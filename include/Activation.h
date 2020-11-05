@@ -2,9 +2,9 @@
 #include <cmath>
 #include <iostream>
 #include "DataStruct.h"
+#include "Convolution.h"
 
-
-void relu6(ds* input_data)
+void Relu6(ds* input_data, ds* filter, ds* output, conv_param* conv_p)
 {
 
     for(int i0=0; i0< input_data->out_channel; i0++)
@@ -32,4 +32,5 @@ void relu6(ds* input_data)
             }
         }
     }
+	std::cout<<"ReLU6 done" << std::endl;
 }
