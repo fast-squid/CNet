@@ -57,24 +57,24 @@ void BatchNormalizationTest()
     
 }
 
-void GroupConvolutionTest()
+void ConvolutionTest()
 {
 	ds input;
 	ds v_output;
 	ds my_output;
 	ds filter;
 	lc layer;
-	layerInit(&layer, 1, 1, 4);
+	layerInit(&layer, 1, 1, 1);
  
 	InitParameter(&input, 1, 32, 112, 112);
-	InitParameter(&filter, 32, 8, 3, 3);
+	InitParameter(&filter, 32, 32, 3, 3);
 	InitParameter(&v_output, 1, 32, 112, 112);
 	
 	ReadBinFile("./validation_data/a.bin",input.data);
 	ReadBinFile("./validation_data/b.bin",filter.data);
 	ReadBinFile("./validation_data/c.bin",v_output.data);
 
-	GroupConvolution(&input, &filter, &my_output, &layer);
+	Convolution(&input, &filter, &my_output, &layer);
 	// validation test
 
 	for(int i = 0; i< 1*32*112*112 ; i++)
@@ -95,7 +95,7 @@ void GroupConvolutionTest()
 int main()
 {
 	//BatchNormalizationTest();
-	GroupConvolutionTest();
+	ConvolutionTest();
     return 0;
 	ds output_data;
     ds input_data;
