@@ -55,6 +55,12 @@ def CutLayer(start_p, end_p, debug=False):
             print(name)
         data.append({'name':name, 'data':param.data.numpy()})
         param.data.numpy().astype('float32').tofile( alpha_root + str(name)+".bin")
+    
+    BN = mv2_cut[0][1]
+    mean = Numpyize(BN.running_mean)
+    var = Numpyize(BN.running_var)
+    mean.astype("float32").tofile( alpha_root +str("moving_mean")+".bin")
+    var.astype("float32").tofile( alpha_root +str("moving_var")+".bin")
     return data, mv2_cut
 
 CutLayer(0,1)
