@@ -109,15 +109,6 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
 	ds sliced_output = *output;
 	ds sliced_filter = *filter;
 
-
-	//	if(layer->groups == 1)
-	//	{
-	//		output->out_channel = 1;
-	//		output->in_channel = filter->out_channel;
-	//		output->height = floor( (D_type)(input->height - filter->height +2*layer->padding)/ layer->strides +1);
-	//		output->width = floor( (D_type)(input->width - filter->width +2*layer->padding)/ layer->strides +1 );	
-	//		output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
-	//	}
 	sliced_input.in_channel/=groups;
 	sliced_filter.out_channel/=groups; // # of filters
 	sliced_output.in_channel = sliced_filter.out_channel;
