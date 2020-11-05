@@ -160,9 +160,41 @@ def GroupConvTest():
     output.astype("float32").tofile(squid_root+"c.bin")
     print(output.shape)
 
+def GroupTEST(G):
+    groups=G
+    i_shape = (1,4,3,3)
+    k_shape = (4,4//groups,3,3)
 
+    input_data = []
+    kernel = []
+    for i in range(0,i_shape[0]*i_shape[1]*i_shape[2]*i_shape[3]):
+        input_data.append(i)
+    for i in range(0, k_shape[0]*k_shape[1]*k_shape[2]*k_shape[3]):
+        if i >= 36:
+            i -= 36
+        kernel.append(i)
 
+    i = torch.tensor(input_data)
+    i = torch.reshape( i, i_shape )
+    k = torch.tensor(kernel)
+    k= torch.reshape( k, k_shape )
     
+    conv = torch.nn.Conv2d(in_channels=4,out_channels=4,kernel_size=(3,3),stride=(1,1),padding=(0,0),groups=groups)
+    conv.weight.data = k
+
+    mod = conv.eval()
+
+    #input_data.astype("float32").tofile(alpha_root+"input.bin")
+    #kernel.astype("float32").tofile(alpha_root+"kernel.bin")
+    output = Numpyize(mod(i))
+    #output.astype("float32").tofile(alpha_root+"output.bin")
+    print(output)
+    print("EMD")
+
+GroupTEST(G = 2)
+
+
+
 def BASELINE():
 
 
@@ -234,8 +266,10 @@ def BASELINE():
 
 
 #GetParam()
-GroupConvTest()
+#GroupConvTest()
 #BASELINE()
 
 
 
+groupConv()
+Conv( group = 2)
