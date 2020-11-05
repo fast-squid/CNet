@@ -56,14 +56,9 @@ def CutLayer(start_p, end_p, debug=False):
         data.append({'name':name, 'data':param.data.numpy()})
         param.data.numpy().astype('float32').tofile( alpha_root + str(name)+".bin")
     
-    BN = mv2_cut[0][1]
-    mean = Numpyize(BN.running_mean)
-    var = Numpyize(BN.running_var)
-    mean.astype("float32").tofile( alpha_root +str("moving_mean")+".bin")
-    var.astype("float32").tofile( alpha_root +str("moving_var")+".bin")
+
     return data, mv2_cut
 
-CutLayer(0,1)
 
 def SimpleRunning():
 
@@ -133,7 +128,9 @@ def TESTlayer():
         valid_data = base[0][1](valid_data)
 
     valid_data = Numpyize(valid_data)
-
+    input_data.astype("float32").tofile(alpha_root + str("input")+".bin")
+    valid_data.astype('float32').tofile( alpha_root + str("output")+".bin")
+    
     BN = base[0][1]
     mean = Numpyize(BN.running_mean)
     var = Numpyize(BN.running_var)
@@ -149,6 +146,9 @@ def TESTlayer():
         print("NOT")
 
     return
+
+
+TESTlayer()
 
 def GroupConvTest():
     input_data = np.random.uniform(-1,1,size=(1,32,112,112)).astype('float32')
