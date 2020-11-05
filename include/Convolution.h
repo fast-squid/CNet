@@ -237,9 +237,9 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
     return;
 }
 
+*/
 
-
-void Convolution(ds* input, ds* filter, ds* output, lc* layer, int groups=1)
+void NaiveConvolution(ds* input, ds* filter, ds* output, lc* layer, int groups=1)
 {
 
     output->out_channel = 1;
@@ -275,7 +275,7 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer, int groups=1)
 							for( int kw=0; kw<filter->width; kw++)
 							{
 								int pad_index = ic*pad_input.height*pad_input.width
-									+ oh*(layer->strides)*pad_input.width + kh*pad_input.width
+									+ oh*(layer->strides)*pad_input.height + kh*pad_input.height
 									+ ow*(layer->strides) + kw;
 
 								int kernel_index = oc*filter->in_channel*filter->height*filter->width
@@ -295,4 +295,3 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer, int groups=1)
 	std::cout<<"Conv done"<<std::endl;
     return;
 }
-*/

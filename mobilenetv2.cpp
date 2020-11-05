@@ -2,7 +2,7 @@
 #include <fstream>
 #include <math.h>
 #include "include/Convolution.h"
-#include "BatchNormalization.h"
+#include "include/BatchNormalization.h"
 
 #define EPSILON 0.000001
 
@@ -74,12 +74,12 @@ void ConvolutionTest()
 	ReadBinFile("./validation_data/b.bin",filter.data);
 	ReadBinFile("./validation_data/c.bin",v_output.data);
 
-	Convolution(&input, &filter, &my_output, &layer);
+	NaiveConvolution(&input, &filter, &my_output, &layer);
 	// validation test
 
 	for(int i = 0; i< 1*32*112*112 ; i++)
     {   
-        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.00001)
+        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.0001)
         {
             std::cout.precision(10);
 
@@ -94,6 +94,8 @@ void ConvolutionTest()
 
 int main()
 {
+
+	std::cout<<"TEST"<<std::endl;
 	//BatchNormalizationTest();
 	ConvolutionTest();
     return 0;
