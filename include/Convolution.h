@@ -87,7 +87,7 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
     return;
 }
 
-void Convolution(ds* input, ds* filter, ds* output, lc* layer )
+void Convolution(ds* input, ds* filter, ds* output, lc* layer, int groups=1)
 {
 	if(layer->groups == 1)
 	{
@@ -98,10 +98,8 @@ void Convolution(ds* input, ds* filter, ds* output, lc* layer )
 		output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
 	}
     std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
-
     ds pad_input;
     PaddingInputImage(input, layer->padding, &pad_input);
-
 
     // ic,kh,kw ---> reduction index
     // output_d += Pad_input[ic][oh+kh][ow+hw]*Filter[ic][kh][kw]
