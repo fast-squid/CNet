@@ -16,7 +16,9 @@ typedef struct sublayer_
 {
 	int sublayer_type = -1;
 	int sublayer_idx = -1;
-	void(*sublayer_fn)(ds* ,ds* ,ds*, conv_param*) = NULL;
+	ds* filter;
+	conv_param* conv_p;
+	ds (*sublayer_fn)(ds* ,ds* , conv_param*) = NULL;
 }sublayer;
 
 typedef struct block_
@@ -26,20 +28,22 @@ typedef struct block_
 }block;
 
 
-void InitSubLayer(sublayer* sl, int sl_type)
+void InitSubLayer(sublayer* sl, int sl_type, ds* filter, conv_param* conv_p)
 {
 	sl->sublayer_type = sl_type;
+	sl->filter = filter;
+	sl->conv_p = conv_p;
 	if(sl->sublayer_type == CONV)
 	{
-		sl->sublayer_fn = Convolution;
+		sl->sublayer_fn = Convolution_;
 	}
 	else if(sl->sublayer_type == BN)
 	{
-		sl->sublayer_fn = BatchNormalization;
+		sl->sublayer_fn = BatchNormalization_;
 	}
 	else if(sl->sublayer_type == RELU)
 	{
-		sl->sublayer_fn = Relu6;
+		sl->sublayer_fn = Relu6_;
 	}
 	else
 	{
@@ -59,14 +63,23 @@ void PushSubLayer(block* blk, sublayer* sl, int layer_idx)
 	blk->sublayers[layer_idx] = *sl;
 }
 
-ds ForwardBlock(block* blk, ds* input, ds* filter, ds*output, conv_param* conv_p)
+void PrintMat(const char* name, ds* mat)
 {
-	ds* input_ptr = input; 
-	ds* output_ptr = output;
+	printf("%s : shape(%d,%d,%d,%d)\n",name, mat->out_channel, mat->in_channel, mat->height, mat->width);
+}
+
+ds ForwardBlock(block* blk, ds* input)
+{
+	ds output;
+	ds* input_ptr = input;
+	ds temp;
 	for(int i = 0; i<blk->sublayer_num;i++)
 	{
-		ds output;
-		blk->sublayers[i].sublayer_fn(input_ptr, filter, &output, conv_p);
-		input_ptr = &output;
+		PrintMat("input", input_ptr);
+		temp = blk->sublayers[i].sublayer_fn(input_ptr, blk->sublayers[i].filter, blk->sublayers[i].conv_p);
+		input_ptr = &temp;
+		PrintMat("output", input_ptr);
 	}
+	output = *input_ptr;
+	return output;
 }

@@ -6,7 +6,7 @@ import numpy as np
 import math
 
 alpha_root = "/home/alpha930/Desktop/CNetProject/CNet/Param/"
-squid_root = "/home/dlwjdaud/mobisprj/Valid/Pytorch/validation_data/"
+squid_root = "/home/dlwjdaud/mobisprj/Param/"
 
 def CMP(t1,t2,bound=0.00001):
     if np.all( np.abs(t1-t2)< bound ):
@@ -54,7 +54,7 @@ def CutLayer(start_p, end_p, debug=False):
         if debug:
             print(name)
         data.append({'name':name, 'data':param.data.numpy()})
-        param.data.numpy().astype('float32').tofile( alpha_root + str(name)+".bin")
+        param.data.numpy().astype('float32').tofile( squid_root + str(name)+".bin")
     
 
     return data, mv2_cut
@@ -126,16 +126,22 @@ def TESTlayer():
         valid_data = base[0][0](test_input_data)
         test_input = Numpyize(valid_data)
         valid_data = base[0][1](valid_data)
+        valid_data = base[0][2](valid_data)
 
     valid_data = Numpyize(valid_data)
-    input_data.astype("float32").tofile(alpha_root + str("input")+".bin")
-    valid_data.astype('float32').tofile( alpha_root + str("output")+".bin")
+    input_data.astype("float32").tofile(squid_root + str("input")+".bin")
+    valid_data.astype('float32').tofile(squid_root + str("output")+".bin")
     
     BN = base[0][1]
     mean = Numpyize(BN.running_mean)
     var = Numpyize(BN.running_var)
     gamma = params[1]['data']
     beta = params[2]['data']
+
+    mean.astype("float32").tofile(squid_root+str("moving_mean.bin"))
+    var.astype("float32").tofile(squid_root+str("moving_var.bin"))
+    gamma.astype("float32").tofile(squid_root+str("gamma.bin"))
+    beta.astype("float32").tofile(squid_root+str("beta.bin"))
 
     output_test = customBN(test_input, mean,var,gamma,beta,1e-05)
 
@@ -162,9 +168,11 @@ def GroupConvTest():
    
     o = model(i)
     output = Numpyize(o)
-    input_data.astype("float32").tofile(squid_root+"a.bin")
-    kernel.astype("float32").tofile(squid_root+"b.bin")
-    output.astype("float32").tofile(squid_root+"c.bin")
+    input_data.astype("float32").tofile(squid_root+"conv_in.bin")
+    kernel.astype("float32").tofile(squid_root+"conv_fil.bin")
+    output.astype("float32").tofile(squid_root+"conv_out.bin")
+    print(input_data.shape)
+    print(kernel.shape)
     print(output.shape)
 
 def GroupTEST(G):
@@ -275,7 +283,5 @@ def BASELINE():
 #GetParam()
 #GroupConvTest()
 #BASELINE()
-
-
 
 #Conv( group = 2)

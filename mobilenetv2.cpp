@@ -5,7 +5,7 @@
 #include "include/BatchNormalization.h"
 #include "include/Block.h" 
 
-void ReadBinFile(char* path, D_type* data)
+void ReadBinFile(const char* path, D_type* data)
 {
 	int idx = 0;
 	float temp;
@@ -35,7 +35,9 @@ void BatchNormalizationTest()
 	ReadBinFile("./validation_data/beta.bin",&filter.data[64]);
 	ReadBinFile("./validation_data/gamma.bin",&filter.data[96]);
 	
-	BatchNormalization(&input, &filter, &my_output, NULL);
+	//BatchNormalization(&input, &filter, &my_output, NULL);
+	my_output = BatchNormalization_(&input, &filter, NULL);
+	
 	// validation test
 
 	for(int i = 0; i< 1*32*112*112 ; i++)
@@ -46,6 +48,7 @@ void BatchNormalizationTest()
 
             std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
             std::cout<<"IDX : "<<i<<std::endl;
+			exit(1);
         }
     }
 	std::cout<<"final Validation Success"<<std::endl;
@@ -65,13 +68,18 @@ void ConvolutionTest()
 	InitParameter(&filter, 32, 32, 3, 3);
 	InitParameter(&v_output, 1, 32, 112, 112);
 	
-	ReadBinFile("./validation_data/a.bin",input.data);
-	ReadBinFile("./validation_data/b.bin",filter.data);
-	ReadBinFile("./validation_data/c.bin",v_output.data);
+	ReadBinFile("./validation_data/conv_in.bin",input.data);
+	ReadBinFile("./validation_data/conv_fil.bin",filter.data);
+	ReadBinFile("./validation_data/conv_out.bin",v_output.data);
+	
+	//for(int i=0;i<32*112*112;i++)
+	//	std::cout << input.data[i] << std::endl;
 
-	NaiveConvolution(&input, &filter, &my_output, &conv_p);
+	//NaiveConvolution(&input, &filter, &my_output, &conv_p);
+	my_output = Convolution_(&input, &filter, &conv_p);
+
 	// validation test
-
+	
 	for(int i = 0; i< 1*32*112*112 ; i++)
     {   
         if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.0001)
@@ -80,6 +88,7 @@ void ConvolutionTest()
 
             std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
             std::cout<<"IDX : "<<i<<std::endl;
+			exit(1);
         }
     }
 	std::cout<<"final Validation Success"<<std::endl;
@@ -92,31 +101,50 @@ void BlockTest()
 	sublayer* sl = (sublayer*)malloc(sizeof(sublayer)*block_size);
 	
 	ds input;
-	ds filter;
 	ds output;
 	ds v_output;
-
+	ds conv_filter;
+	ds bn_filter;
 	conv_param conv_p;
-	InitConvParam(&conv_p, 1, 1, 1);
-	InitParameter(&input, 1, 32, 112, 112);
-	InitParameter(&filter, 32, 32, 3, 3);
+
+	InitConvParam(&conv_p, 1, 2, 1 );
+	InitParameter(&input, 1, 3, 224, 224);
 	InitParameter(&v_output, 1, 32, 112, 112);
-	
-	ReadBinFile("./validation_data/a.bin",input.data);
-	ReadBinFile("./validation_data/b.bin",filter.data);
-	ReadBinFile("./validation_data/c.bin",v_output.data);
+	InitParameter(&conv_filter, 32, 3, 3, 3);
+	InitParameter(&bn_filter, 1, 1, 1, 32*4);
+	ReadBinFile("./Param/input.bin",input.data);
+	ReadBinFile("./Param/output.bin",v_output.data);
+	ReadBinFile("./Param/0.0.weight.bin",conv_filter.data);
+	ReadBinFile("./Param/moving_mean.bin",&bn_filter.data[0]);
+	ReadBinFile("./Param/moving_var.bin",&bn_filter.data[32]);
+	ReadBinFile("./Param/beta.bin",&bn_filter.data[64]);
+	ReadBinFile("./Param/gamma.bin",&bn_filter.data[96]);
 
-
-	InitSubLayer(&sl[0], CONV);
-	InitSubLayer(&sl[1], BN);
-	InitSubLayer(&sl[2], RELU);
+	InitSubLayer(&sl[0], CONV, &conv_filter, &conv_p);
+	InitSubLayer(&sl[1], BN, &bn_filter, NULL);
+	InitSubLayer(&sl[2], RELU, NULL, NULL);
 	block blk;
 	InitBlock(&blk, block_size);
 	for(int i = 0; i< block_size; i++)
 	{
 		PushSubLayer(&blk, &sl[i], i);
 	}
-	ForwardBlock(&blk, &input, &filter, &output, &conv_p);
+	output = ForwardBlock(&blk, &input);
+	//validation test
+	
+	for(int i = 0; i< 1*32*112*112 ; i++)
+    {   
+        if( std::abs( v_output.data[i] - output.data[i] ) > 0.0001)
+        {
+            std::cout.precision(10);
+
+            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<output.data[i]<<std::endl;
+            std::cout<<"IDX : "<<i<<std::endl;
+			//exit(1);
+        }
+    }
+	std::cout<<"final Validation Success"<<std::endl;
+
 }
 
 int main()
