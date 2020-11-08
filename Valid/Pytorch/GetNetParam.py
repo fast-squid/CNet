@@ -59,6 +59,7 @@ def CutLayer(start_p, end_p, debug=False):
 
     return data, mv2_cut
 
+CutLayer(0,1)
 
 def SimpleRunning():
 
@@ -148,8 +149,6 @@ def TESTlayer():
     return
 
 
-TESTlayer()
-
 def GroupConvTest():
     input_data = np.random.uniform(-1,1,size=(1,32,112,112)).astype('float32')
     kernel = np.random.uniform(-1,1,size=(32,32,3,3)).astype('float32')
@@ -197,10 +196,6 @@ def GroupTEST(G):
     #output.astype("float32").tofile(alpha_root+"output.bin")
     print(output)
     print("EMD")
-
-GroupTEST(G = 2)
-
-
 
 def BASELINE():
 
@@ -274,9 +269,9 @@ def BASELINE():
 
 #GetParam()
 #GroupConvTest()
-#BASELINE()
+BASELINE()
 
 
 
-groupConv()
-Conv( group = 2)
+#groupConv()
+#Conv( group = 2)
