@@ -64,7 +64,7 @@ ds Relu6_(ds* input_data, ds* filter, conv_param* conv_p)
             }
         }
     }
-	std::cout<<"ReLU6 done" << std::endl;
+	std::cout<<"\t\t\tReLU6 done" << std::endl;
 	output = *input_data;
 	return output;
 }

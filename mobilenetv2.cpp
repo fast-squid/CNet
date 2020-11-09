@@ -1,9 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <assert.h>
 #include "include/Convolution.h"
 #include "include/BatchNormalization.h"
-#include "include/Block.h" 
+#include "include/NetStruct.h" 
+#include "include/Model.h"
 
 void ReadBinFile(const char* path, D_type* data)
 {
@@ -15,6 +17,27 @@ void ReadBinFile(const char* path, D_type* data)
 	{
 		data[idx++] = temp;
 	}
+}
+
+bool CompareMat(ds* x,ds* y)
+{
+	int x_size = GetTotalSize(x);
+	int y_size = GetTotalSize(y);
+	assert(x_size == y_size);
+
+	for(int i = 0; i< x_size ; i++)
+    {  
+		//printf("%f | %f\n",x->data[i], y->data[i]);
+		if( std::abs( x->data[i] - y->data[i] ) > 0.0001)
+        {
+            std::cout.precision(10);
+
+            std::cout<<"ERROR "<< x->data[i]<<" | "<< y->data[i]<<std::endl;
+            std::cout<<"IDX : "<<i<<std::endl;
+			return false;
+        }
+    }
+	return true;
 }
 
 void BatchNormalizationTest()
@@ -39,19 +62,10 @@ void BatchNormalizationTest()
 	my_output = BatchNormalization_(&input, &filter, NULL);
 	
 	// validation test
-
-	for(int i = 0; i< 1*32*112*112 ; i++)
-    {   
-        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.00001)
-        {
-            std::cout.precision(10);
-
-            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
-            std::cout<<"IDX : "<<i<<std::endl;
-			exit(1);
-        }
-    }
-	std::cout<<"final Validation Success"<<std::endl;
+	if(CompareMat(&v_output, &my_output) == false)
+		std::cout<<"Validation fail"<<std::endl;
+	else
+		std::cout<<"Validation Success"<<std::endl;
     
 }
 
@@ -72,33 +86,23 @@ void ConvolutionTest()
 	ReadBinFile("./validation_data/conv_fil.bin",filter.data);
 	ReadBinFile("./validation_data/conv_out.bin",v_output.data);
 	
-	//for(int i=0;i<32*112*112;i++)
-	//	std::cout << input.data[i] << std::endl;
-
 	//NaiveConvolution(&input, &filter, &my_output, &conv_p);
 	my_output = Convolution_(&input, &filter, &conv_p);
 
 	// validation test
-	
-	for(int i = 0; i< 1*32*112*112 ; i++)
-    {   
-        if( std::abs( v_output.data[i] - my_output.data[i] ) > 0.0001)
-        {
-            std::cout.precision(10);
+	if(CompareMat(&v_output, &my_output) == false)
+		std::cout<<"Validation fail"<<std::endl;
+	else
+		std::cout<<"Validation Success"<<std::endl;
 
-            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<my_output.data[i]<<std::endl;
-            std::cout<<"IDX : "<<i<<std::endl;
-			exit(1);
-        }
-    }
-	std::cout<<"final Validation Success"<<std::endl;
     
 }
 
+
 void BlockTest()
 {
-	int block_size = 3;
-	sublayer* sl = (sublayer*)malloc(sizeof(sublayer)*block_size);
+	int sublayer_size = 3;
+	operation* ops = (operation*)malloc(sizeof(operation)*sublayer_size);
 	
 	ds input;
 	ds output;
@@ -107,8 +111,8 @@ void BlockTest()
 	ds bn_filter;
 	conv_param conv_p;
 
-	InitConvParam(&conv_p, 1, 2, 1 );
-	InitParameter(&input, 1, 3, 224, 224);
+	InitConvParam(&conv_p, 2, 1, 1 );
+	InitParameter(&input,1,3,224,224 );
 	InitParameter(&v_output, 1, 32, 112, 112);
 	InitParameter(&conv_filter, 32, 3, 3, 3);
 	InitParameter(&bn_filter, 1, 1, 1, 32*4);
@@ -120,41 +124,64 @@ void BlockTest()
 	ReadBinFile("./Param/beta.bin",&bn_filter.data[64]);
 	ReadBinFile("./Param/gamma.bin",&bn_filter.data[96]);
 
-	InitSubLayer(&sl[0], CONV, &conv_filter, &conv_p);
-	InitSubLayer(&sl[1], BN, &bn_filter, NULL);
-	InitSubLayer(&sl[2], RELU, NULL, NULL);
-	block blk;
-	InitBlock(&blk, block_size);
-	for(int i = 0; i< block_size; i++)
+
+	InitOperation(&ops[0], CONV, &conv_filter, &conv_p);
+	InitOperation(&ops[1], BN, &bn_filter, NULL);
+	InitOperation(&ops[2], RELU, NULL, NULL);
+
+	sublayer sl;
+	InitSublayer(&sl, sublayer_size);
+	for(int i = 0; i< sublayer_size; i++)
 	{
-		PushSubLayer(&blk, &sl[i], i);
+		PushOperation(&sl, &ops[i], i);
 	}
-	output = ForwardBlock(&blk, &input);
+	output = ForwardSublayer(&sl, &input);
+
 	//validation test
-	
-	for(int i = 0; i< 1*32*112*112 ; i++)
-    {   
-        if( std::abs( v_output.data[i] - output.data[i] ) > 0.0001)
-        {
-            std::cout.precision(10);
-
-            std::cout<<"ERROR "<< v_output.data[i]<<" | "<<output.data[i]<<std::endl;
-            std::cout<<"IDX : "<<i<<std::endl;
-			//exit(1);
-        }
-    }
-	std::cout<<"final Validation Success"<<std::endl;
-
+	if(CompareMat(&v_output, &output) == false)
+		std::cout<<"Validation fail"<<std::endl;
+	else
+		std::cout<<"Validation Success"<<std::endl;
 }
 
 int main()
 {
 
 	std::cout<<"TEST"<<std::endl;
-	//BatchNormalizationTest();
+	//BatchNormalizationTest();	
 	//ConvolutionTest();
-	BlockTest();
-    return 0;
+	//BlockTest();
+	//return 0;
+	net network = GetMobileNetV2();
+	ds input;
+	ds output;
+	ds v_output;
+	InitParameter(&input, 1, 3, 224, 224);
+	ReadBinFile("./Weights/input/input_data.bin",input.data);
+
+	//InitParameter(&v_output, 1, 16, 112, 112);	//0
+	//InitParameter(&v_output, 1, 16, 112, 112);	//1
+	//InitParameter(&v_output, 1, 24, 56, 56);		//2
+	//InitParameter(&v_output, 1, 24, 56, 56);		//3
+	//InitParameter(&v_output, 1, 32, 28, 28);	//4
+	InitParameter(&v_output, 1, 1280, 7, 7);	//18
+	//ReadBinFile("./Param/input.bin",input.data);
+	//ReadBinFile("./Param/output.bin",v_output.data);
+	
+	//ReadBinFile("./Weights/layer_0_ConvBNRelu/imm_out.bin",v_output.data);	//0
+	//ReadBinFile("./Weights/layer_1_InvertedResidual/imm_out.bin",v_output.data);	//1
+	//ReadBinFile("./Weights/layer_2_InvertedResidual/imm_out.bin",v_output.data);	//2
+	//ReadBinFile("./Weights/layer_3_InvertedResidual/imm_out.bin",v_output.data);	//3
+	//ReadBinFile("./Weights/layer_4_InvertedResidual/imm_out.bin",v_output.data);	//3
+	
+	ReadBinFile("./Weights/layer_18_ConvBNRelu/imm_out.bin",v_output.data);		//18
+	output = Inference(&network,&input);
+	if(CompareMat(&v_output, &output) == false)
+		std::cout<<"Validation fail"<<std::endl;
+	else
+		std::cout<<"Validation Success"<<std::endl;
+
+	return 0;
 	ds output_data;
     ds input_data;
     ds filter;

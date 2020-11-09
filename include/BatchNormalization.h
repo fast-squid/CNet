@@ -4,7 +4,7 @@
 #include "DataStruct.h"
 #include "Convolution.h"
 
-#define EPS 0.000001
+#define EPS 0.00001
 // E -> moving-Mean
 // Var -> moving-Variance
 // 
@@ -63,8 +63,7 @@ ds BatchNormalization_(ds* input, ds* filter, conv_param* conv_p)
 	const D_type eps = EPS;
 	ds output;
 	InitParameter(&output, input->out_channel, input->in_channel, input->height, input->width);
-	printf("bn input shape : (%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width);
-
+	
 	int size = input->out_channel*input->in_channel;
 	D_type* moving_mean = &filter->data[0];
 	D_type* moving_var = &filter->data[1*size];
@@ -73,11 +72,12 @@ ds BatchNormalization_(ds* input, ds* filter, conv_param* conv_p)
 
 	D_type* factorA = (D_type*)malloc(sizeof(D_type)*size);
 	D_type* var = (D_type*)malloc(sizeof(D_type)*size);	
-	
+	//printf("filter shape(%d %d %d %d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width);		
 	for(int i = 0; i < size; i++)
 	{
 		var[i] = sqrt(moving_var[i] + eps);
 		factorA[i] = gamma[i]/var[i];
+		//printf("%f | %f | %f | %f\n",moving_mean[i], moving_var[i],beta[i],gamma[i]);
 	}
 
 	for(int oc = 0; oc<input->out_channel; oc++)
@@ -99,8 +99,7 @@ ds BatchNormalization_(ds* input, ds* filter, conv_param* conv_p)
             }
         }
     }
-	std::cout << "BatchNormalization Done" << std::endl; 
-	printf("bn output shape : (%d,%d,%d,%d)\n",output.out_channel, output.in_channel, output.height, output.width);
+	std::cout << "\t\t\tBatchNormalization Done" << std::endl; 
 	return output;
 }
 

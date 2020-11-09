@@ -4,12 +4,20 @@
 #include "DataStruct.h"
 #include <string.h>
 
-void InitConvParam(conv_param* conv_p, int pad, int stride, int groups)
+void InitDS(ds* data, const int (&shape)[4])
+{
+	data->out_channel = shape[0];
+	data->in_channel = shape[1];
+	data->height = shape[2];
+	data->width = shape[3];
+	data->data = (D_type*)malloc(sizeof(D_type)*data->out_channel*data->in_channel*data->height*data->width);
+}
+
+void InitConvParam(conv_param* conv_p, int stride, int pad, int groups)
 {
     conv_p->padding = pad;
     conv_p->strides = stride;
     conv_p->groups = groups;
-    return;
 }
 
 void InitParameter(ds* data, int out_channel ,int in_channel, int height, int width)
@@ -104,7 +112,7 @@ void Convolution(ds* input, ds* filter, ds* output, conv_param* conv_p )
 	int strides = conv_p->strides;
 	// init output
 	SetOutputShape(input, filter, output, conv_p);
-	std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
+	//std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
 	// splitting by groups
 	ds sliced_input = *input;
 	ds sliced_output = *output;
@@ -114,12 +122,9 @@ void Convolution(ds* input, ds* filter, ds* output, conv_param* conv_p )
 	sliced_filter.out_channel/=groups; // # of filters
 	sliced_output.in_channel = sliced_filter.out_channel;
 
-	printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,
-			sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
-	printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,
-			sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
-	printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output->out_channel, output->in_channel, output->height, output->width,
-			sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
+	//printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
+	//printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
+	//printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output->out_channel, output->in_channel, output->height, output->width,sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
 
 	int in_offset = sliced_input.in_channel
 		*sliced_input.height
@@ -181,7 +186,7 @@ void Convolution(ds* input, ds* filter, ds* output, conv_param* conv_p )
 		free( pad_input.data );
 
 	}
-	std::cout<<"Conv done"<<std::endl;
+	std::cout<<"\t\t\tConv done"<<std::endl;
     return;
 }
 
@@ -203,12 +208,9 @@ ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
 	sliced_filter.out_channel/=groups; // # of filters
 	sliced_output.in_channel = sliced_filter.out_channel;
 
-	printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,
-			sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
-	printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,
-			sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
-	printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output.out_channel, output.in_channel, output.height, output.width,
-			sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
+	//printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
+	//printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
+	//printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output.out_channel, output.in_channel, output.height, output.width,sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
 
 	int in_offset = sliced_input.in_channel
 		*sliced_input.height
@@ -269,7 +271,7 @@ ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
 		free( pad_input.data );
 
 	}
-	std::cout<<"Conv done"<<std::endl;
+	std::cout<<"\t\t\tConv done"<<std::endl;
     return output;
 }
 
