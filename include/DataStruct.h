@@ -10,6 +10,16 @@ typedef struct weight_data_struct
     int width = 0;
 } ds;
 
+typedef struct layer_weight
+{
+    ds weight={NULL,1,1,1,1};
+    ds mean={NULL,1,1,1,1};
+    ds var={NULL,1,1,1,1};
+    ds gamma ={NULL,1,1,1,1};
+    ds beta ={NULL,1,1,1,1};
+
+} lw;
+
 typedef struct conv_param_
 {
     int padding=1;
