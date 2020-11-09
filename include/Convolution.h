@@ -4,64 +4,22 @@
 #include "DataStruct.h"
 #include <string.h>
 
-void InitDS(ds* data, const int (&shape)[4])
-{
-	data->out_channel = shape[0];
-	data->in_channel = shape[1];
-	data->height = shape[2];
-	data->width = shape[3];
-	data->data = (D_type*)malloc(sizeof(D_type)*data->out_channel*data->in_channel*data->height*data->width);
-}
-
-void InitConvParam(conv_param* conv_p, int stride, int pad, int groups)
-{
-    conv_p->padding = pad;
-    conv_p->strides = stride;
-    conv_p->groups = groups;
-}
-
-void InitParameter(ds* data, int out_channel ,int in_channel, int height, int width)
-{
-    data->out_channel = out_channel;
-    data->in_channel = in_channel;
-    data->height = height;
-    data->width = width;
-    data->data = (D_type*)malloc(sizeof(D_type)*out_channel*in_channel*height*width);
-
-    int temp =1;
-    for(int oc = 0; oc<out_channel; oc++)
-    {
-        for(int ic=0; ic<in_channel; ic++)
-        {
-            for(int h=0; h<height; h++)
-            {
-                for(int w=0; w<width; w++)
-                {
-                    int data_index= oc*in_channel*height*width + ic*height*width + h*width + w;
-                    data->data[data_index] = (D_type)temp;
-                    temp = temp % 24;
-                    temp ++;
-                }
-            }
-        }
-    }
-    return;
-}
 
 void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
 {
-    int total_allocation_size = p_input->out_channel * p_input->in_channel * (p_input->height+2*pad) * (p_input->width+2*pad);
-
-    pad_temp->data = (D_type*)malloc(sizeof(D_type)*total_allocation_size);
-    pad_temp->out_channel=p_input->out_channel;
-    pad_temp->in_channel=p_input->in_channel;
-    pad_temp->height=p_input->height+2*pad;
-    pad_temp->width=p_input->width+2*pad;
-
     int out_channel = p_input->out_channel;
     int in_channel = p_input->in_channel;
     int pad_height = p_input->height + 2*pad;
     int pad_width = p_input->width + 2*pad;
+	//InitMat(p_input, {out_channel, in_channel, pad_height, pad_width});
+
+	int total_allocation_size = p_input->out_channel * p_input->in_channel * (p_input->height+2*pad) * (p_input->width+2*pad);
+
+    pad_temp->data = (DTYPE*)malloc(sizeof(DTYPE)*total_allocation_size);
+    pad_temp->out_channel=p_input->out_channel;
+    pad_temp->in_channel=p_input->in_channel;
+    pad_temp->height=p_input->height+2*pad;
+    pad_temp->width=p_input->width+2*pad;
 
     for( int i0 =0; i0< out_channel; i0++)
     {   
@@ -96,101 +54,16 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
     return;
 }
 
-void SetOutputShape(ds* input, ds* filter, ds* output, conv_param* conv_p)
+void SetOutputShape(ds* input, ds* filter, ds* output, Param* conv_p)
 {
 	output->out_channel = 1;
 	output->in_channel = filter->out_channel;
-	output->height = floor( (D_type)(input->height - filter->height +2*conv_p->padding)/conv_p->strides +1);
-	output->width = floor( (D_type)(input->width - filter->width +2*conv_p->padding)/conv_p->strides +1 );
-	output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width); 
+	output->height = floor( (DTYPE)(input->height - filter->height +2*conv_p->padding)/conv_p->strides +1);
+	output->width = floor( (DTYPE)(input->width - filter->width +2*conv_p->padding)/conv_p->strides +1 );
+	//output->data = (DTYPE*)malloc(sizeof(DTYPE)*output->out_channel*output->in_channel*output->height*output->width); 
 }
 
-void Convolution(ds* input, ds* filter, ds* output, conv_param* conv_p )
-{
-	int groups = conv_p->groups;
-	int padding = conv_p->padding;
-	int strides = conv_p->strides;
-	// init output
-	SetOutputShape(input, filter, output, conv_p);
-	//std::cout<<"Output_Shape = "<<output->out_channel<<","<<output->in_channel<<","<<output->height<<","<<output->width<<std::endl;
-	// splitting by groups
-	ds sliced_input = *input;
-	ds sliced_output = *output;
-	ds sliced_filter = *filter;
-
-	sliced_input.in_channel/=groups;
-	sliced_filter.out_channel/=groups; // # of filters
-	sliced_output.in_channel = sliced_filter.out_channel;
-
-	//printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
-	//printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
-	//printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output->out_channel, output->in_channel, output->height, output->width,sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
-
-	int in_offset = sliced_input.in_channel
-		*sliced_input.height
-		*sliced_input.width;
-	int out_offset = sliced_output.in_channel
-		*sliced_output.height
-		*sliced_output.width;	
-	int filter_offset = sliced_filter.in_channel
-		*sliced_filter.out_channel
-		*sliced_filter.height
-		*sliced_filter.width;
-
-
-	for(int g = 0; g<groups; g++)
-	{
-		sliced_input.data = &input->data[g*in_offset];
-		sliced_output.data = &output->data[g*out_offset];
-		sliced_filter.data = &filter->data[g*filter_offset];
-
-		ds pad_input;
-		PaddingInputImage(&sliced_input, conv_p->padding, &pad_input);
-
-		// ic,kh,kw ---> reduction index
-		// output_d += Pad_input[ic][oh+kh][ow+hw]*Filter[ic][kh][kw]
-		for(int oc=0; oc< sliced_output.in_channel; oc++ )
-		{
-			for(int oh=0; oh<sliced_output.height; oh++)
-			{
-				for( int ow=0; ow<sliced_output.width; ow++)
-				{
-					int out_index = oc*sliced_output.height*sliced_output.width
-						+ oh*sliced_output.width
-						+ ow;
-					sliced_output.data[out_index] = 0;
-
-					/// Reduction Phase
-					for( int ic=0; ic< sliced_filter.in_channel; ic++)
-					{
-						for( int kh=0; kh<sliced_filter.height; kh++)
-						{
-							for( int kw=0; kw<sliced_filter.width; kw++)
-							{
-								int pad_index = ic*pad_input.height*pad_input.width
-									+ oh*(conv_p->strides)*pad_input.width + kh*pad_input.width
-									+ ow*(conv_p->strides) + kw;
-
-								int kernel_index = oc*sliced_filter.in_channel*sliced_filter.height*sliced_filter.width
-									+ ic*sliced_filter.height*sliced_filter.width
-									+ kh*sliced_filter.width
-									+ kw;
-
-								sliced_output.data[out_index] = pad_input.data[pad_index] * sliced_filter.data[kernel_index];
-							}
-						}
-					}
-				}
-			}
-		}
-		free( pad_input.data );
-
-	}
-	std::cout<<"\t\t\tConv done"<<std::endl;
-    return;
-}
-
-ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
+ds Convolution(ds* input, ds* filter, Param* conv_p )
 {
 	int groups = conv_p->groups;
 	int padding = conv_p->padding;
@@ -199,6 +72,7 @@ ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
 	// init output
 	ds output;
 	SetOutputShape(input, filter, &output, conv_p);
+	InitMat(&output, {output.out_channel, output.in_channel, output.height, output.width});
 	// splitting by groups
 	ds sliced_input = *input;
 	ds sliced_output = output;
@@ -207,10 +81,6 @@ ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
 	sliced_input.in_channel/=groups;
 	sliced_filter.out_channel/=groups; // # of filters
 	sliced_output.in_channel = sliced_filter.out_channel;
-
-	//printf("sliced_input shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",input->out_channel, input->in_channel, input->height, input->width,sliced_input.out_channel, sliced_input.in_channel, sliced_input.height, sliced_input.width);
-	//printf("sliced_filter shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",filter->out_channel, filter->in_channel, filter->height, filter->width,sliced_filter.out_channel, sliced_filter.in_channel, sliced_filter.height, sliced_filter.width);
-	//printf("sliced_output shape (%d,%d,%d,%d)->(%d,%d,%d,%d)\n",output.out_channel, output.in_channel, output.height, output.width,sliced_output.out_channel, sliced_output.in_channel, sliced_output.height, sliced_output.width);
 
 	int in_offset = sliced_input.in_channel
 		*sliced_input.height
@@ -271,7 +141,7 @@ ds Convolution_(ds* input, ds* filter, conv_param* conv_p )
 		free( pad_input.data );
 
 	}
-	std::cout<<"\t\t\tConv done"<<std::endl;
+	std::cout<<"\t\t\t\t\t\tConv done"<<std::endl;
     return output;
 }
 
@@ -282,7 +152,7 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
 {
     int total_allocation_size = p_input->out_channel * p_input->in_channel * (p_input->height+2*pad) * (p_input->width+2*pad);
 
-    pad_temp->data = (D_type*)malloc(sizeof(D_type)*total_allocation_size);
+    pad_temp->data = (DTYPE*)malloc(sizeof(DTYPE)*total_allocation_size);
     pad_temp->out_channel=p_input->out_channel;
     pad_temp->in_channel=p_input->in_channel;
     pad_temp->height=p_input->height+2*pad;
@@ -328,14 +198,14 @@ void PaddingInputImage(const ds* p_input, int pad ,ds* pad_temp)
 
 */
 
-void NaiveConvolution(ds* input, ds* filter, ds* output, conv_param* conv_p, int groups=1)
+void NaiveConvolution(ds* input, ds* filter, ds* output, Param* conv_p, int groups=1)
 {
 
     output->out_channel = 1;
     output->in_channel = filter->out_channel;
-    output->height = floor( (D_type)(input->height - filter->height +2*conv_p->padding)/ conv_p->strides +1);
-    output->width = floor( (D_type)(input->width - filter->width +2*conv_p->padding)/ conv_p->strides +1 );	
-    output->data = (D_type*)malloc(sizeof(D_type)*output->out_channel*output->in_channel*output->height*output->width);
+    output->height = floor( (DTYPE)(input->height - filter->height +2*conv_p->padding)/ conv_p->strides +1);
+    output->width = floor( (DTYPE)(input->width - filter->width +2*conv_p->padding)/ conv_p->strides +1 );	
+    output->data = (DTYPE*)malloc(sizeof(DTYPE)*output->out_channel*output->in_channel*output->height*output->width);
 
     ds pad_input;
     PaddingInputImage(input, conv_p->padding, &pad_input);

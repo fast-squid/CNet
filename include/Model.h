@@ -57,176 +57,57 @@ const int opcodes[141] = {
 	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 15
 	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 16
 	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 17
-	CONV,BN,RELU, 
-	DROP,LINEAR
+	CONV,BN,RELU,							// 18 
+	DROP,LINEAR								// 19
 };
     //std::string root = "/home/alpha930/Desktop/CNetProj/Weights/";
-const int shapes[] =
-	{32, 3, 3, 3,
-	32,
-	32, 1, 3, 3,
-	32,
-	16, 32, 1, 1,
-	16,
-	96, 16, 1, 1,
-	96,
-	96, 1, 3, 3,
-	96,
-	24, 96, 1, 1,
-	24,
-	144, 24, 1, 1,
-	144,
-	144, 1, 3, 3,
-	144,
-	24, 144, 1, 1,
-	24,
-	144, 24, 1, 1,
-	144,
-	144, 1, 3, 3,
-	144,
-	32, 144, 1, 1,
-	32,
-	192, 32, 1, 1,
-	192,
-	192, 1, 3, 3,
-	192,
-	32, 192, 1, 1,
-	32,
-	192, 32, 1, 1,
-	192,
-	192, 1, 3, 3,
-	192,
-	32, 192, 1, 1,
-	32,
-	192, 32, 1, 1,
-	192,
-	192, 1, 3, 3,
-	192,
-	64, 192, 1, 1,
-	64,
-	384, 64, 1, 1,
-	384,
-	384, 1, 3, 3,
-	384,
-	64, 384, 1, 1,
-	64,
-	384, 64, 1, 1,
-	384,
-	384, 1, 3, 3,
-	384,
-	64, 384, 1, 1,
-	64,
-	384, 64, 1, 1,
-	384,
-	384, 1, 3, 3,
-	384,
-	64, 384, 1, 1,
-	64,
-	384, 64, 1, 1,
-	384,
-	384, 1, 3, 3,
-	384,
-	96, 384, 1, 1,
-	96,
-	576, 96, 1, 1,
-	576,
-	576, 1, 3, 3,
-	576,
-	96, 576, 1, 1,
-	96,
-	576, 96, 1, 1,
-	576,
-	576, 1, 3, 3,
-	576,
-	96, 576, 1, 1,
-	96,
-	576, 96, 1, 1,
-	576,
-	576, 1, 3, 3,
-	576,
-	160, 576, 1, 1,
-	160,
-	960, 160, 1, 1,
-	960,
-	960, 1, 3, 3,
-	960,
-	160, 960, 1, 1,
-	160,
-	960, 160, 1, 1,
-	960,
-	960, 1, 3, 3,
-	960,
-	160, 960, 1, 1,
-	160,
-	960, 160, 1, 1,
-	960,
-	960, 1, 3, 3,
-	960,
-	320, 960, 1, 1,
-	320,
-	1280, 320, 1, 1,
-	1280,
-	-1,-1,-1,-1
+const int shapes_[][4] = {
+	{32,3,3,3},{1,1,1,128},{0,0,0,0},
+	{32,1,3,3},{1,1,1,128},{0,0,0,0},{16,32,1,1},{1,1,1,64},
+	{96,16,1,1},{1,1,1,384},{0,0,0,0},{96,1,3,3},{1,1,1,384},{0,0,0,0},{24,96,1,1},{1,1,1,96},
+	{144,24,1,1},{1,1,1,576},{0,0,0,0},{144,1,3,3},{1,1,1,576},{0,0,0,0},{24,144,1,1},{1,1,1,96},
+	{144,24,1,1},{1,1,1,576},{0,0,0,0},{144,1,3,3},{1,1,1,576},{0,0,0,0},{32,144,1,1},{1,1,1,128},
+	{192,32,1,1},{1,1,1,768},{0,0,0,0},{192,1,3,3},{1,1,1,768},{0,0,0,0},{32,192,1,1},{1,1,1,128},
+	{192,32,1,1},{1,1,1,768},{0,0,0,0},{192,1,3,3},{1,1,1,768},{0,0,0,0},{32,192,1,1},{1,1,1,128},
+	{192,32,1,1},{1,1,1,768},{0,0,0,0},{192,1,3,3},{1,1,1,768},{0,0,0,0},{64,192,1,1},{1,1,1,256},
+	{384,64,1,1},{1,1,1,1536},{0,0,0,0},{384,1,3,3},{1,1,1,1536},{0,0,0,0},{64,384,1,1},{1,1,1,256},
+	{384,64,1,1},{1,1,1,1536},{0,0,0,0},{384,1,3,3},{1,1,1,1536},{0,0,0,0},{64,384,1,1},{1,1,1,256},
+	{384,64,1,1},{1,1,1,1536},{0,0,0,0},{384,1,3,3},{1,1,1,1536},{0,0,0,0},{64,384,1,1},{1,1,1,256},
+	{384,64,1,1},{1,1,1,1536},{0,0,0,0},{384,1,3,3},{1,1,1,1536},{0,0,0,0},{96,384,1,1},{1,1,1,384},
+	{576,96,1,1},{1,1,1,2304},{0,0,0,0},{576,1,3,3},{1,1,1,2304},{0,0,0,0},{96,576,1,1},{1,1,1,384},
+	{576,96,1,1},{1,1,1,2304},{0,0,0,0},{576,1,3,3},{1,1,1,2304},{0,0,0,0},{96,576,1,1},{1,1,1,384},
+	{576,96,1,1},{1,1,1,2304},{0,0,0,0},{576,1,3,3},{1,1,1,2304},{0,0,0,0},{160,576,1,1},{1,1,1,640},
+	{960,160,1,1},{1,1,1,3840},{0,0,0,0},{960,1,3,3},{1,1,1,3840},{0,0,0,0},{160,960,1,1},{1,1,1,640},
+	{960,160,1,1},{1,1,1,3840},{0,0,0,0},{960,1,3,3},{1,1,1,3840},{0,0,0,0},{160,960,1,1},{1,1,1,640},
+	{960,160,1,1},{1,1,1,3840},{0,0,0,0},{960,1,3,3},{1,1,1,3840},{0,0,0,0},{320,960,1,1},{1,1,1,1280},
+	{1280,320,1,1},{1,1,1,5120},{0,0,0,0}
 };
 
-int params[] = {
-	2,1,1,
-	1,1,32,
-	1,0,1,
-	1,0,1,
-	2,1,96,
-	1,0,1,
-	1,0,1,
-	1,1,144,
-	1,0,1,
-	1,0,1,
-	2,1,144,
-	1,0,1,
-	1,0,1,
-	1,1,192,
-	1,0,1,
-	1,0,1,
-	1,1,192,
-	1,0,1,
-	1,0,1,
-	2,1,192,
-	1,0,1,
-	1,0,1,
-	1,1,384,
-	1,0,1,
-	1,0,1,
-	1,1,384,
-	1,0,1,
-	1,0,1,
-	1,1,384,
-	1,0,1,
-	1,0,1,
-	1,1,384,
-	1,0,1,
-	1,0,1,
-	1,1,576,
-	1,0,1,
-	1,0,1,
-	1,1,576,
-	1,0,1,
-	1,0,1,
-	2,1,576,
-	1,0,1,
-	1,0,1,
-	1,1,960,
-	1,0,1,
-	1,0,1,
-	1,1,960,
-	1,0,1,
-	1,0,1,
-	1,1,960,
-	1,0,1,
-	1,0,1
+const int params_[][3] = {
+	{2,1,1},{0,0,0},{0,0,0},
+	{1,1,32},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{2,1,96},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,144},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{2,1,144},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,192},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,192},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{2,1,192},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,384},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,384},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,384},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,384},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,576},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,576},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{2,1,576},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,960},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,960},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0},{1,1,960},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
+	{1,0,1},{0,0,0},{0,0,0}
 };
 
 void PrintModel(net* n)
 {
-	char name[5][20] = {"Conv","BN","RELU", "DROP", "LINEAR"};
+	char name[5][20] = {"CONV","BN","RELU", "DROP", "LINEAR"};
 	printf("model : %s\n",n->name);
 	for(int i=0;i<n->size;i++)
 	{
@@ -237,27 +118,27 @@ void PrintModel(net* n)
 			for(int k=0;k<slptr->size;k++)
 			{
 				operation* op= &slptr->ops[k];
-				if(op->op_type == CONV)
+				if(op->opcode == CONV)
 				{
 					printf("model[layer:%d][sublayer:%d][op:%d] : %s, shape(%d,%d,%d,%d), param(stride:%d,padding %d,group %d)\n", i,j,k,name[CONV],
 						op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width,
-						op->conv_p->strides, op->conv_p->padding, op->conv_p->groups);
+						op->param->strides, op->param->padding, op->param->groups);
 				}
-				else if( op -> op_type == BN)
+				else if( op -> opcode == BN)
 				{
 					printf("model[layer:%d][sublayer:%d][op:%d] : %s, shape(%d,%d,%d,%d)\n", i,j,k,name[BN],
 						op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width);
 
 				}
-				else if( op -> op_type == RELU)
+				else if( op -> opcode == RELU)
 				{
 					printf("model[layer:%d][sublayer:%d][op:%d] : %s\n", i,j,k,name[RELU]);
 				}
-				else if( op -> op_type == DROP)
+				else if( op -> opcode == DROP)
 				{
 					printf("model[layer:%d][sublayer:%d][op:%d] : %s\n", i,j,k,name[DROP]);
 				}
-				else if( op -> op_type == RELU)
+				else if( op -> opcode == RELU)
 				{
 					printf("model[layer:%d][sublayer:%d][op:%d] : %s\n", i,j,k,name[LINEAR]);
 				}			
@@ -268,11 +149,10 @@ void PrintModel(net* n)
 			}
 		}
 	}
-
 }
 
 
-void ReadBinFile_(D_type* data, std::string target)
+void ReadBinFile_(DTYPE* data, std::string target)
 {
 
     std::string root = "/home/dlwjdaud/mobisprj/Weights/";
@@ -285,17 +165,102 @@ void ReadBinFile_(D_type* data, std::string target)
 	}
 
     int index=0;
-    D_type load_val;
+    DTYPE load_val;
     std::ifstream read_file(test, std::ios::binary);
     if ( !read_file.is_open() )
     {
         std::cout<<"No Such Binaray"<<std::endl;
         exit(-1);
     }
-    while( read_file.read(reinterpret_cast<char*>(&load_val), sizeof(D_type)))
+    while( read_file.read(reinterpret_cast<char*>(&load_val), sizeof(DTYPE)))
     {
         data[index++] = load_val;
     }
+}
+
+void PrintTemp(net*n )
+{
+	printf("{");
+	for(int i=0;i<n->size;i++)
+	{
+		layer* lptr = &n->layers[i];
+		for(int j=0;j<lptr->size;j++)
+		{
+			sublayer* slptr = &lptr->sublayers[j];
+			for(int k=0;k<slptr->size;k++)
+			{
+				operation* op= &slptr->ops[k];
+				if(op->opcode == CONV)
+				{
+						printf("{%d,%d,%d,%d},",op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width);
+				}
+				else if( op -> opcode == BN)
+				{
+					printf("{%d,%d,%d,%d},",op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width);
+				}
+				else if( op -> opcode == RELU)
+				{
+					printf("{%d,%d,%d,%d},",0,0,0,0);
+				}
+				else if( op -> opcode == DROP)
+				{
+				}
+				else if( op -> opcode == RELU)
+				{
+				}			
+				if(op->filter)
+				{
+					//PrintMat(op->filter);
+				}
+			}
+		}
+
+		printf("\n");
+	}
+	printf("}");
+}
+
+void PrintTempTemp(net*n )
+{
+	printf("{");
+	for(int i=0;i<n->size;i++)
+	{
+		layer* lptr = &n->layers[i];
+		for(int j=0;j<lptr->size;j++)
+		{
+			sublayer* slptr = &lptr->sublayers[j];
+			for(int k=0;k<slptr->size;k++)
+			{
+				operation* op= &slptr->ops[k];
+				if(op->opcode == CONV)
+				{
+						printf("{%d,%d,%d},",op->param->strides, op->param->padding,op->param->groups);
+				}
+				else if( op -> opcode == BN)
+				{
+					printf("{%d,%d,%d},",0,0,0);
+				}
+				else if( op -> opcode == RELU)
+				{
+					printf("{%d,%d,%d},",0,0,0);
+				}
+				else if( op -> opcode == DROP)
+				{
+				}
+				else if( op -> opcode == RELU)
+				{
+				}			
+				if(op->filter)
+				{
+					//PrintMat(op->filter);
+				}
+			}
+		}
+
+			printf("\n");
+	}
+	printf("}");
+
 }
 
 
@@ -306,8 +271,6 @@ void ReadWeights(net* n)
 		layer* lptr = &n->layers[li];
 		for (int sli =0; sli<lptr->size;sli++)
 		{
-
-			printf("%d %d \n",li,sli);
 			sublayer* slptr = &lptr->sublayers[sli];
 			std::string target = "";
 			if( li == 0 || li == 18)
@@ -465,84 +428,51 @@ void ReadWeights(net* n)
 
 		}
 	}
-
 }
-net GetMobileNetV2()
+
+net GetMobileNetV2_()
 {
-	operation* ops = (operation*)malloc(sizeof(operation)*141);
-	
-	int si = 0;
-	int pi = 0;
-	for(int i=0;i<141;i++)
-	{
-		ds* filter;		
-		conv_param* param;	
-		if(opcodes[i] == CONV)
-		{
-			filter = (ds*)malloc(sizeof(ds));
-			param = (conv_param*)malloc(sizeof(conv_param));
-
-			InitParameter(filter,shapes[si], shapes[si+1], shapes[si+2], shapes[si+3]);
-			InitConvParam(param, params[pi], params[pi+1], params[pi+2]);
-			si+=4; 
-			pi+=3;
-		}
-		else if(opcodes[i] == BN)
-		{
-			filter = (ds*)malloc(sizeof(ds));
-			param = NULL;
-			InitParameter(filter,1, 1, 1, shapes[si]*4);
-			si++;
-		}
-		else if(opcodes[i]  == RELU)
-		{
-			filter = NULL;
-			param = NULL;
-		}
-		else if(opcodes[i] == DROP)
-		{
-		}
-		else if (opcodes[i] == LINEAR)
-		{
-		}
-		InitOperation(&ops[i], opcodes[i], filter, param);
-	}
-
-	sublayer* sublayers = (sublayer*)malloc(sizeof(sublayer)*72);
-	int oi = 0;
-	for(int i=0;i<72;i++)
-	{
-		sublayers[i].size = sublayer_sizes[i];
-		sublayers[i].ops = (operation*)malloc(sizeof(operation)*sublayer_sizes[i]);
-		for(int j=0;j<sublayers[i].size;j++)
-		{
-			PushOperation(&sublayers[i],&ops[oi++], j);
-		}
-	}
-	
-	layer* layers = (layer*)malloc(sizeof(layer)*20);
-	int sbi = 0;
-	for(int i=0;i<20;i++)
-	{
-		layers[i].size = layer_sizes[i];
-		layers[i].sublayers = (sublayer*)malloc(sizeof(sublayer)*layer_sizes[i]);
-		for(int j=0;j<layers[i].size;j++)
-		{
-			PushSublayer(&layers[i], &sublayers[sbi++],j);
-		}
-	}
-	
 	net mobilenetv2;
-	strcpy(mobilenetv2.name, "mobilenetv2");
-	mobilenetv2.size = 20;
-	mobilenetv2.layers = (layer*)malloc(sizeof(layer)*20);
-	for(int i=0;i<20;i++){
-		PushLayer(&mobilenetv2, &layers[i],i);
+	net* nptr = &mobilenetv2;
+	InitNetwork(nptr,"mobilenetv2",20);
+	
+	int sublayer_i = 0;
+	int opcode_i = 0;
+	int shape_i = 0;
+	int param_i = 0;
+	
+	// Iterate network's layers
+	for(int li=0;li<nptr->size;li++)
+	{
+		layer* lptr = &nptr->layers[li];
+		InitLayer(lptr,layer_sizes[li]);
+		
+		// Iterate layer's sublayers
+		for(int sli = 0; sli < lptr->size; sli++)
+		{
+			sublayer* slptr = &lptr->sublayers[sli];
+			InitSublayer(slptr,sublayer_sizes[sublayer_i++]);
+			
+			// Iterate sublayer's operation
+			for(int opi = 0; opi < slptr->size; opi++)
+			{
+				operation* op = &slptr->ops[opi];
+
+				op->filter = (ds*)malloc(sizeof(ds));
+				op->param = (Param*)malloc(sizeof(Param));
+
+				InitMat(op->filter,shapes_[shape_i++]);
+				InitParam(op->param, params_[param_i++]);
+				InitOperation(op,opcodes[opcode_i++]);
+			}
+		}
 	}
+
 	ReadWeights(&mobilenetv2);
-	PrintModel(&mobilenetv2);	
+	//PrintModel(&mobilenetv2);	
+	//PrintTemp(&mobilenetv2);
+	//PrintTempTemp(&mobilenetv2);
+
 	return mobilenetv2;
 }
-
-
 

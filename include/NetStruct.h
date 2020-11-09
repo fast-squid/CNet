@@ -13,19 +13,20 @@ const int DROP = 3;
 const int LINEAR = 4;
 const int NETSIZE = 19;
 /*
- * Network 
+ * Architecture :
+ * network 
  *	|- layer
  *		|- sublayer
- *			|- operation(conv,bn,relu)
+ *			|- operation(conv, bn, relu, dropout, linear...)
  */
 
 typedef struct operation_
 {
-	int op_type = -1;
+	int opcode = -1;
 	int op_idx = -1;
 	ds* filter;
-	conv_param* conv_p;
-	ds (*op_fn)(ds* ,ds* , conv_param*) = NULL;
+	Param* param;
+	ds (*op_fn)(ds* ,ds* , Param*) = NULL;
 }operation;
 
 typedef struct sublayer_
@@ -49,27 +50,25 @@ typedef struct net_
 	layer* layers = NULL;
 }net;
 
-void InitOperation(operation* op, int op_type, ds* filter, conv_param* conv_p)
+void InitOperation(operation* op, int opcode)
 {
-	op->op_type = op_type;
-	op->filter = filter;
-	op->conv_p = conv_p;
-	if(op->op_type == CONV)
+	op->opcode = opcode;
+	if(op->opcode == CONV)
 	{
-		op->op_fn = Convolution_;
+		op->op_fn = Convolution;
 	}
-	else if(op->op_type == BN)
+	else if(op->opcode == BN)
 	{
-		op->op_fn = BatchNormalization_;
+		op->op_fn = BatchNormalization;
 	}
-	else if(op->op_type == RELU)
+	else if(op->opcode == RELU)
 	{
-		op->op_fn = Relu6_;
+		op->op_fn = Relu6;
 	}
-	else if(op->op_type == DROP)
+	else if(op->opcode == DROP)
 	{
 	}
-	else if(op->op_type == LINEAR)
+	else if(op->opcode == LINEAR)
 	{
 	}
 	else
@@ -127,9 +126,9 @@ ds ForwardSublayer(sublayer* sl, ds* input)
 	ds temp;
 	for(int i = 0; i<sl->size;i++)
 	{
-		printf("\t\toperation %d\n",i);
+		printf("\t\t\t\toperation %d\n",i);
 		//PrintMat(input_ptr);
-		temp = sl->ops[i].op_fn(input_ptr, sl->ops[i].filter, sl->ops[i].conv_p);
+		temp = sl->ops[i].op_fn(input_ptr, sl->ops[i].filter, sl->ops[i].param);
 		input_ptr = &temp;
 		//PrintMat(input_ptr);
 	}
@@ -144,7 +143,7 @@ ds ForwardLayer(layer* l, ds* input)
 	ds temp;
 	for(int i=0;i<l->size;i++)
 	{
-		printf("\tsublayer %d\n",i);
+		printf("\t\tsublayer %d\n",i);
 		temp = ForwardSublayer(&l->sublayers[i], input_ptr);
 		input_ptr = &temp;
 	}	
@@ -152,9 +151,8 @@ ds ForwardLayer(layer* l, ds* input)
 			input->in_channel == input_ptr->in_channel &&
 			input->height == input_ptr->height &&
 			input->width == input_ptr->width && 
-			l->sublayers[1].ops[0].conv_p->strides == 1)
+			l->sublayers[1].ops[0].param->strides == 1)
 	{
-		printf("skip\n");
 		output = Skipconnection(input, input_ptr);
 	}
 	else
