@@ -6,7 +6,6 @@
 #include "Activation.h"
 #include "NetStruct.h"
 
-// # :  20
 const int layer_sizes[] = {
 	1,3,4,4,4,
 	4,4,4,4,4,
@@ -14,53 +13,58 @@ const int layer_sizes[] = {
 	4,4,4,1,1
 };
 
-// # : 72
 const int sublayer_sizes[] = {
-	3,				//0
-	3,1,1,			//1
-	3,3,1,1,		//2
-	3,3,1,1,		//3
-	3,3,1,1,		//4
-	3,3,1,1,		//5
-	3,3,1,1,		//6
-	3,3,1,1,		//7
-	3,3,1,1,		//8
-	3,3,1,1,		//9
-	3,3,1,1,		//10
-	3,3,1,1,		//11
-	3,3,1,1,		//12
-	3,3,1,1,		//13
-	3,3,1,1,		//14
-	3,3,1,1,		//15
-	3,3,1,1,		//16
-	3,3,1,1,		//17
-	3,				//18
-	2				//19
+	3,				
+	3,1,1,			
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,3,1,1,		
+	3,				
+	2				
 };
 
-const int opcodes[141] = {
-	CONV,BN,RELU,							// 0
-	CONV,BN,RELU, CONV, BN,					// 1
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 2
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 3
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 4
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 5
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 6
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 7
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 8
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 9
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 10
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 11
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 12
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 13
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 14
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 15
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 16
-	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	// 17
-	CONV,BN,RELU,							// 18 
-	DROP,LINEAR								// 19
+const int opcodes[] = {
+	CONV,BN,RELU,							
+	CONV,BN,RELU, CONV, BN,					
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU, CONV,BN,RELU, CONV, BN,	
+	CONV,BN,RELU,							
+	DROP,LINEAR								
 };
-    //std::string root = "/home/alpha930/Desktop/CNetProj/Weights/";
+
+/*
+ * shapes[layer] = {n,c,h,w}
+ * layer 0, 18 : ConvBNReLU
+ * layer 1 : ConvBNReLU, Conv, BN
+ * layer 2~ 17 : ConvBNReLU, ConvBNReLU, Conv, BN
+ */
 const int shapes_[][4] = {
 	{32,3,3,3},{1,1,1,128},{0,0,0,0},
 	{32,1,3,3},{1,1,1,128},{0,0,0,0},{16,32,1,1},{1,1,1,64},
@@ -83,6 +87,12 @@ const int shapes_[][4] = {
 	{1280,320,1,1},{1,1,1,5120},{0,0,0,0}
 };
 
+/*
+ * param[layer] = {strides, padding, group}
+ * layer 0, 18 : ConvBNReLU
+ * layer 1 : ConvBNReLU, Conv, BN
+ * layer 2~ 17 : ConvBNReLU, ConvBNReLU, Conv, BN
+ */
 const int params_[][3] = {
 	{2,1,1},{0,0,0},{0,0,0},
 	{1,1,32},{0,0,0},{0,0,0},{1,0,1},{0,0,0},
@@ -155,9 +165,9 @@ void PrintModel(net* n)
 void ReadBinFile_(DTYPE* data, std::string target)
 {
 
-    std::string root = "/home/dlwjdaud/mobisprj/Weights/";
+    std::string root = "./Weights/";
     std::string test = root+target + ".bin";
-
+	std::cout<< test << std::endl;
     if( data==NULL)
     {
 		printf("Data is NULL\n");
@@ -178,254 +188,46 @@ void ReadBinFile_(DTYPE* data, std::string target)
     }
 }
 
-void PrintTemp(net*n )
-{
-	printf("{");
-	for(int i=0;i<n->size;i++)
-	{
-		layer* lptr = &n->layers[i];
-		for(int j=0;j<lptr->size;j++)
-		{
-			sublayer* slptr = &lptr->sublayers[j];
-			for(int k=0;k<slptr->size;k++)
-			{
-				operation* op= &slptr->ops[k];
-				if(op->opcode == CONV)
-				{
-						printf("{%d,%d,%d,%d},",op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width);
-				}
-				else if( op -> opcode == BN)
-				{
-					printf("{%d,%d,%d,%d},",op->filter->out_channel, op->filter->in_channel, op->filter->height, op->filter->width);
-				}
-				else if( op -> opcode == RELU)
-				{
-					printf("{%d,%d,%d,%d},",0,0,0,0);
-				}
-				else if( op -> opcode == DROP)
-				{
-				}
-				else if( op -> opcode == RELU)
-				{
-				}			
-				if(op->filter)
-				{
-					//PrintMat(op->filter);
-				}
-			}
-		}
-
-		printf("\n");
-	}
-	printf("}");
-}
-
-void PrintTempTemp(net*n )
-{
-	printf("{");
-	for(int i=0;i<n->size;i++)
-	{
-		layer* lptr = &n->layers[i];
-		for(int j=0;j<lptr->size;j++)
-		{
-			sublayer* slptr = &lptr->sublayers[j];
-			for(int k=0;k<slptr->size;k++)
-			{
-				operation* op= &slptr->ops[k];
-				if(op->opcode == CONV)
-				{
-						printf("{%d,%d,%d},",op->param->strides, op->param->padding,op->param->groups);
-				}
-				else if( op -> opcode == BN)
-				{
-					printf("{%d,%d,%d},",0,0,0);
-				}
-				else if( op -> opcode == RELU)
-				{
-					printf("{%d,%d,%d},",0,0,0);
-				}
-				else if( op -> opcode == DROP)
-				{
-				}
-				else if( op -> opcode == RELU)
-				{
-				}			
-				if(op->filter)
-				{
-					//PrintMat(op->filter);
-				}
-			}
-		}
-
-			printf("\n");
-	}
-	printf("}");
-
-}
-
-
 void ReadWeights(net* n)
 {
+	const char layer_name[][20] = {
+		"_ConvBNRelu/", "_InvertedResidual/"
+	};
+	const char weight_name[][20] = {
+		"0_Conv","1_BatchNorm_mean","1_BatchNorm_var","1_BatchNorm_beta", "1_BatchNorm_gamma",
+		"3_Conv","4_BatchNorm_mean","4_BatchNorm_var","4_BatchNorm_beta", "4_BatchNorm_gamma",
+		"6_Conv","7_BatchNorm_mean","7_BatchNorm_var","7_BatchNorm_beta", "7_BatchNorm_gamma",
+	};
+	
 	for( int li =0; li<19; li++)
 	{
 		layer* lptr = &n->layers[li];
-		for (int sli =0; sli<lptr->size;sli++)
+
+		int idx = 0;
+		for (int sli = 0; sli<lptr->size;sli++)
 		{
 			sublayer* slptr = &lptr->sublayers[sli];
-			std::string target = "";
-			if( li == 0 || li == 18)
-			{
-				operation* op;
-				int offset;
-				if(sli == 0){
-					op = &slptr->ops[0];
-					target = "layer_"+std::to_string(li)+"_ConvBNRelu/0_Conv";
-					ReadBinFile_(&op->filter->data[0], target);
-
-					op = &slptr->ops[1];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_ConvBNRelu/1_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_ConvBNRelu/1_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_ConvBNRelu/1_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_ConvBNRelu/1_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
-				}
-			}
-			else if( li == 1)
-			{
-				operation* op;
-				int offset;
-				if(sli == 0){
-					op = &slptr->ops[0];
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/0_Conv";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					op = &slptr->ops[1];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
-				}
-				/////////////////////////////////////////////////////////////////////////
-				if(sli == 1){
-					op = &slptr->ops[0];
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/3_Conv";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-				}
-				/////////////////////////////////////////////////////////////////////////
-				if(sli == 2){
-
-					op = &slptr->ops[0];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
-				}
-			}   
+			std::string target = "layer_"+std::to_string(li);
+			if(li == 0 || li == 18)
+				target += layer_name[0];
 			else
+				target += layer_name[1];
+			for(int opi = 0; opi<slptr->size;opi++)
 			{
-				operation* op;
-				int offset;
-				if(sli == 0)
+				operation* op = &slptr->ops[opi];
+				if(op->opcode == CONV)
 				{
-					/////////////////////////////////////////////////////////////////////////	
-					op = &slptr->ops[0];
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/0_Conv";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					op = &slptr->ops[1];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/1_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
+					ReadBinFile_(&op->filter->data[0],target+weight_name[idx++]);
 				}
-				/////////////////////////////////////////////////////////////////////////
-				else if(sli == 1)
+				else if(op->opcode == BN)
 				{
-					op = &slptr->ops[0];
-					offset = op->filter->width/4;
-
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/3_Conv";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-					
-					op = &slptr->ops[1];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/4_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
-				}
-				/////////////////////////////////////////////////////////////////////////
-				else if(sli == 2){
-					op = &slptr->ops[0];
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/6_Conv";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-				}
-				/////////////////////////////////////////////////////////////////////////
-				else if(sli == 3){
-					op = &slptr->ops[0];
-					offset = op->filter->width/4;
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/7_BatchNorm_mean";
-					ReadBinFile_(&op->filter->data[offset*0], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/7_BatchNorm_var";
-					ReadBinFile_(&op->filter->data[offset*1], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/7_BatchNorm_beta";
-					ReadBinFile_(&op->filter->data[offset*2], target);
-
-					target = "layer_"+std::to_string(li)+"_InvertedResidual/7_BatchNorm_gamma";
-					ReadBinFile_(&op->filter->data[offset*3], target);
+					int offset = op->filter->width/4;
+					for(int i=0;i<4;i++)
+					{
+						ReadBinFile_(&op->filter->data[i*offset],target+weight_name[idx++]);
+					}
 				}
 			}
-
 		}
 	}
 }
